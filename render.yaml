@@ -4,11 +4,9 @@ services:
     env: python
     plan: free
     region: oregon
-
     buildCommand: |
       pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
-
     startCommand: gunicorn app:app --bind 0.0.0.0:10000
-
-    pythonVersion: 3.10
+    runtime: python
+    runtimeVersion: "3.10"
