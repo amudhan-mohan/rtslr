@@ -1,12 +1,11 @@
 services:
   - type: web
     name: rtslr
-    runtime: python
-    repo: https://github.com/amudhan-mohan/rtslr
+    env: python
     plan: free
     region: oregon
+
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
+    startCommand: gunicorn app:app --bind 0.0.0.0:10000
+
+    pythonVersion: 3.10.13
