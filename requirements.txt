@@ -1,6 +1,8 @@
 flask==2.3.3
 opencv-python==4.8.1.78
-mediapipe==0.10.33
+mediapipe-silicon==0.10.7
+mediapipe==0.10.7
 numpy==1.24.3
-torch==2.1.0
-gunicorn
+torch==2.0.1
+gunicorn==21.2.0
+opencv-python-headless==4.8.1.78
