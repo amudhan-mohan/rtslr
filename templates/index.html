@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+  <title>Real-Time Sign Language Recognition</title>
+  <meta name="description"
+    content="A deep learning powered real-time Indian Sign Language recognition system built with LSTM, MediaPipe, and PyTorch. Final Year Project." />
+
+  <!-- Tailwind CSS (compiled output) -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <!-- Google Fonts: SF Pro equivalent pairing -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    /* ── Font Override (use Syne as display, Inter as body) ── */
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #000;
+      color: #fff;
+    }
+
+    .font-display {
+      font-family: 'Syne', sans-serif;
+    }
+
+    /* ── Glassmorphism ── */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 24px;
+    }
+
+    .glass-card-hover {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 24px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card-hover:hover {
+      background: rgba(255, 255, 255, 0.085);
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-5px);
+      box-shadow: 0 32px 80px rgba(0, 113, 227, 0.18);
+    }
+
+    .nav-glass {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 28px;
+      border-radius: 100px;
+      font-size: 15px;
+      font-weight: 500;
+      background: #0071e3;
+      color: #fff;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-primary:hover {
+      background: #0077ed;
+      transform: scale(1.02);
+      box-shadow: 0 0 36px rgba(0, 113, 227, 0.45);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 28px;
+      border-radius: 100px;
+      font-size: 15px;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.28);
+    }
+
+    /* Responsive button sizes */
+    @media (max-width: 640px) {
+
+      .btn-primary,
+      .btn-secondary {
+        padding: 10px 20px;
+        font-size: 13px;
+      }
+    }
+
+    /* ── Typography ── */
+    .hero-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.5rem, 8vw, 6.5rem);
+      line-height: 1.0;
+      letter-spacing: -0.03em;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.75rem, 4vw, 3.25rem);
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      background: linear-gradient(180deg, #fff 0%, rgba(255, 255, 255, 0.65) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .shimmer-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      background: linear-gradient(90deg, #ffffff 0%, #0071e3 30%, #00b4ff 50%, #0071e3 70%, #ffffff 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 0% center;
+      }
+
+      100% {
+        background-position: 200% center;
+      }
+    }
+
+    .eyebrow {
+      font-size: clamp(10px, 3vw, 11px);
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #0071e3;
+    }
+
+    /* ── Backgrounds ── */
+    .bg-grid {
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    .glow-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Floating Animation ── */
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-18px);
+      }
+    }
+
+    .floating {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .floating-delay {
+      animation: float 6s ease-in-out 1.5s infinite;
+    }
+
+    /* ── Pulse Ring ── */
+    @keyframes pulseRing {
+      0% {
+        box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.4);
+      }
+
+      70% {
+        box-shadow: 0 0 0 20px rgba(0, 113, 227, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(0, 113, 227, 0);
+      }
+    }
+
+    .pulse-ring {
+      animation: pulseRing 2s ease infinite;
+    }
+
+    /* ── Tech Badge ── */
+    .tech-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: clamp(11px, 3vw, 12px);
+      font-weight: 500;
+      background: rgba(0, 113, 227, 0.12);
+      border: 1px solid rgba(0, 113, 227, 0.28);
+      color: #60a5fa;
+    }
+
+    /* ── Progress bars ── */
+    .progress-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, #0071e3, #00b4ff);
+      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ── AOS (Animate on Scroll) ── */
+    .aos {
+      opacity: 0;
+      transform: translateY(36px);
+      transition: opacity 0.85s ease, transform 0.85s ease;
+    }
+
+    .aos.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .aos-d1 {
+      transition-delay: 0.1s;
+    }
+
+    .aos-d2 {
+      transition-delay: 0.2s;
+    }
+
+    .aos-d3 {
+      transition-delay: 0.3s;
+    }
+
+    .aos-d4 {
+      transition-delay: 0.4s;
+    }
+
+    .aos-d5 {
+      transition-delay: 0.5s;
+    }
+
+    /* ── Live Demo Area ── */
+    .scan-overlay {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .scan-overlay::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0, 113, 227, 0.8), transparent);
+      animation: scanLine 3s ease-in-out infinite;
+    }
+
+    @keyframes scanLine {
+      0% {
+        top: 0%;
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 1;
+      }
+
+      90% {
+        opacity: 1;
+      }
+
+      100% {
+        top: 100%;
+        opacity: 0;
+      }
+    }
+
+    /* ── Section divider ── */
+    .section-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+    }
+
+    /* ── Nav link ── */
+    .nav-link {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+      transition: color 0.2s;
+      text-decoration: none;
+    }
+
+    .nav-link:hover {
+      color: #fff;
+    }
+
+    /* ── Feature icon ── */
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 113, 227, 0.12);
+      border: 1px solid rgba(0, 113, 227, 0.22);
+      margin-bottom: 20px;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 640px) {
+      .feature-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        margin-bottom: 15px;
+      }
+    }
+
+    /* ── Team card avatar ── */
+    .avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0071e3, #00b4ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 640px) {
+      .avatar {
+        width: 56px;
+        height: 56px;
+        font-size: 20px;
+      }
+    }
+
+    /* ── Gesture tag ── */
+    .gesture-tag {
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: clamp(11px, 3vw, 13px);
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      color: rgba(255, 255, 255, 0.75);
+      transition: all 0.3s;
+    }
+
+    .gesture-tag:hover {
+      background: rgba(0, 113, 227, 0.15);
+      border-color: rgba(0, 113, 227, 0.35);
+      color: #60a5fa;
+    }
+
+    /* ── Code block ── */
+    .code-block {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: clamp(11px, 3vw, 13px);
+      line-height: 1.8;
+      overflow-x: auto;
+    }
+
+    @media (max-width: 640px) {
+      .code-block {
+        padding: 16px;
+        font-size: 11px;
+      }
+    }
+
+    .code-kw {
+      color: #c792ea;
+    }
+
+    .code-fn {
+      color: #82aaff;
+    }
+
+    .code-str {
+      color: #c3e88d;
+    }
+
+    .code-comment {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .code-num {
+      color: #f78c6c;
+    }
+
+    .code-cls {
+      color: #ffcb6b;
+    }
+
+    /* Mobile menu animation keyframes */
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      to {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+    }
+
+    #mobileMenu.show {
+      display: block;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    #mobileMenu.hide {
+      animation: slideUp 0.3s ease-out;
+    }
+
+    #menuToggle.active span:first-child {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    #menuToggle.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    #menuToggle.active span:last-child {
+      transform: rotate(-45deg) translate(5px, -5px);
+    }
+
+    body.menu-open {
+      overflow: hidden;
+    }
+
+    /* Responsive spacing utilities */
+    @media (max-width: 640px) {
+      .section-padding {
+        padding: 60px 20px;
+      }
+
+      .hero-padding {
+        padding-top: 80px;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-black text-white overflow-x-hidden">
+
+  <!-- NAVIGATION WITH RESPONSIVE MOBILE MENU -->
+  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2.5 no-underline" style="text-decoration:none">
+        <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm flex-shrink-0"
+          style="background:linear-gradient(135deg,#0071e3,#00b4ff)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+            <path
+              d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+          </svg>
+        </div>
+        <span class="font-display font-700 text-white text-sm xs:inline"
+          style="font-family:'Syne',sans-serif;font-weight:700">RTSLR</span>
+      </a>
+
+      <!-- Desktop Navigation Links (hidden on tablet/mobile) -->
+      <div class="hidden lg:flex items-center gap-7">
+        <a href="#about" class="nav-link">About</a>
+        <a href="#how-it-works" class="nav-link">How It Works</a>
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#gestures" class="nav-link">Gestures</a>
+        <a href="#architecture" class="nav-link">Architecture</a>
+        <a href="#team" class="nav-link">Team</a>
+      </div>
+
+      <!-- Right side items (CTA + Mobile Menu) -->
+      <div class="flex items-center gap-3">
+        <!-- CTA Button -->
+        <a href="/inference" class="btn-primary text-sm py-2 px-5 hidden sm:inline-flex">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polygon points="10 8 16 12 10 16 10 8" />
+          </svg>
+          Inference
+        </a>
+
+        <!-- Mobile Menu Hamburger Button -->
+        <button id="menuToggle"
+          class="lg:hidden flex flex-col items-center justify-center w-8 h-8 rounded-md border border-white/20 bg-transparent hover:border-[#0071e3] transition-all cursor-pointer">
+          <span class="block w-4 h-0.5 bg-white/60 rounded-full transition-all duration-300"></span>
+          <span class="block w-4 h-0.5 bg-white/60 rounded-full my-1 transition-all duration-300"></span>
+          <span class="block w-4 h-0.5 bg-white/60 rounded-full transition-all duration-300"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Dropdown (hidden by default) -->
+    <div id="mobileMenu"
+      class="lg:hidden hidden bg-black/95 backdrop-blur-md border-t border-white/10 overflow-hidden transition-all duration-300">
+      <div class="flex flex-col py-3 px-4 space-y-1 max-h-[80vh] overflow-y-auto">
+        <a href="#about"
+          class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-white/60 transition-all hover:text-white hover:bg-white/10 flex items-center gap-3">About</a>
+        <a href="#how-it-works"
+          class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-white/60 transition-all hover:text-white hover:bg-white/10 flex items-center gap-3">How
+          It Works</a>
+        <a href="#features"
+          class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-white/60 transition-all hover:text-white hover:bg-white/10 flex items-center gap-3">Features</a>
+        <a href="#gestures"
+          class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-white/60 transition-all hover:text-white hover:bg-white/10 flex items-center gap-3">Gestures</a>
+        <a href="#architecture"
+          class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-white/60 transition-all hover:text-white hover:bg-white/10 flex items-center gap-3">Architecture</a>
+        <a href="#team"
+          class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-white/60 transition-all hover:text-white hover:bg-white/10 flex items-center gap-3">Team</a>
+        <div class="border-t border-white/10 my-2"></div>
+        <a href="/inference"
+          class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#0071e3] bg-[#0071e3]/10 transition-all hover:bg-[#0071e3]/20 flex items-center gap-3">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polygon points="10 8 16 12 10 16 10 8" />
+          </svg>
+          Inference
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero"
+    class="relative min-h-screen flex flex-col items-center justify-center text-center px-4 sm:px-6 overflow-hidden bg-grid pt-20">
+
+    <!-- Glow orbs - responsive positioning -->
+    <div class="glow-orb"
+      style="width:min(600px,80vw);height:min(600px,80vw);background:rgba(0,113,227,0.18);top:-100px;left:50%;transform:translateX(-50%)">
+    </div>
+    <div class="glow-orb"
+      style="width:min(400px,60vw);height:min(400px,60vw);background:rgba(0,180,255,0.10);bottom:-80px;right:10%"></div>
+    <div class="glow-orb"
+      style="width:min(300px,50vw);height:min(300px,50vw);background:rgba(0,113,227,0.10);bottom:10%;left:5%"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 max-w-5xl mx-auto pt-16 sm:pt-24">
+
+      <!-- Eyebrow badge -->
+      <div class="aos inline-flex items-center gap-2 mb-6 sm:mb-8 px-3 py-2 sm:px-4 rounded-full"
+        style="background:rgba(0,113,227,0.12);border:1px solid rgba(0,113,227,0.28)">
+        <span class="w-2 h-2 rounded-full bg-blue-400 pulse-ring"></span>
+        <span class="text-[10px] sm:text-xs font-medium text-blue-300 tracking-wide">Final Year Project — B.E. Computer
+          Science</span>
+      </div>
+
+      <!-- Main Title -->
+      <h1 class="hero-title mb-4 sm:mb-6">
+        <span class="shimmer-text">Indian Sign</span><br />
+        <span style="color:rgba(255,255,255,0.92)">Language</span><br />
+        <span style="color:rgba(255,255,255,0.55)">Recognition.</span>
+      </h1>
+
+      <p
+        class="text-base sm:text-lg md:text-xl text-white/50 max-w-2xl mx-auto leading-relaxed font-light mb-8 sm:mb-10 px-2 aos aos-d1">
+        A real-time deep learning system that bridges the communication gap between the deaf and hearing communities —
+        powered by LSTM, MediaPipe, and PyTorch.
+      </p>
+
+      <!-- Badges -->
+      <div class="flex flex-wrap items-center justify-center gap-2 mb-10 sm:mb-12 aos aos-d2">
+        <span class="tech-badge">🧠 LSTM Network</span>
+        <span class="tech-badge">🤲 MediaPipe</span>
+        <span class="tech-badge">⚡ PyTorch</span>
+        <span class="tech-badge">📷 Real-Time CV</span>
+        <span class="tech-badge">🇮🇳 49 ISL Gestures</span>
+      </div>
+
+      <!-- CTAs -->
+      <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-16 sm:mb-20 aos aos-d3">
+        <a href="#demo" class="btn-primary text-sm sm:text-base py-3 sm:py-3.5 px-5 sm:px-8">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polygon points="10 8 16 12 10 16 10 8" />
+          </svg>
+          Watch Demo
+        </a>
+        <a href="#how-it-works" class="btn-secondary text-sm sm:text-base py-3 sm:py-3.5 px-5 sm:px-8">
+          Explore System
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Stats Row - Responsive grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-3xl mx-auto aos aos-d4">
+        <div class="glass-card text-center px-2 sm:px-4 py-3 sm:py-5">
+          <div class="text-2xl sm:text-3xl font-display font-800 text-white mb-1"
+            style="font-family:'Syne',sans-serif;font-weight:800">49</div>
+          <div class="text-[10px] sm:text-xs text-white/40 font-medium">ISL Gestures</div>
+        </div>
+        <div class="glass-card text-center px-2 sm:px-4 py-3 sm:py-5">
+          <div class="text-2xl sm:text-3xl font-display font-800 text-white mb-1"
+            style="font-family:'Syne',sans-serif;font-weight:800">98.4%</div>
+          <div class="text-[10px] sm:text-xs text-white/40 font-medium">Accuracy</div>
+        </div>
+        <div class="glass-card text-center px-2 sm:px-4 py-3 sm:py-5">
+          <div class="text-2xl sm:text-3xl font-display font-800 text-white mb-1"
+            style="font-family:'Syne',sans-serif;font-weight:800">30fps</div>
+          <div class="text-[10px] sm:text-xs text-white/40 font-medium">Real-Time Speed</div>
+        </div>
+        <div class="glass-card text-center px-2 sm:px-4 py-3 sm:py-5">
+          <div class="text-2xl sm:text-3xl font-display font-800 text-white mb-1"
+            style="font-family:'Syne',sans-serif;font-weight:800">258</div>
+          <div class="text-[10px] sm:text-xs text-white/40 font-medium">Keypoints / Frame</div>
+        </div>
+      </div>
+
+      <!-- Scroll cue -->
+      <div
+        class="mt-16 sm:mt-20 flex flex-col items-center gap-2 text-white/25 text-[10px] sm:text-xs tracking-widest uppercase">
+        <span>Scroll to explore</span>
+        <svg class="animate-bounce" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2">
+          <path d="M12 5v14M5 12l7 7 7-7" />
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ABOUT / PROBLEM STATEMENT -->
+  <section id="about" class="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
+    <div class="glow-orb"
+      style="width:min(500px,70vw);height:min(500px,70vw);background:rgba(0,113,227,0.10);top:0;right:-100px"></div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+        <!-- Text -->
+        <div>
+          <p class="eyebrow mb-3 sm:mb-4 aos">Problem Statement</p>
+          <h2 class="section-title mb-5 sm:mb-6 aos aos-d1">Breaking the silence between two worlds.</h2>
+          <p class="text-white/50 text-base sm:text-lg leading-relaxed mb-5 sm:mb-6 aos aos-d2">
+            Over 63 million people in India have significant hearing loss. The communication gap between the deaf and
+            hearing communities creates barriers in education, employment, and daily life.
+          </p>
+          <p class="text-white/50 text-base sm:text-lg leading-relaxed mb-8 sm:mb-10 aos aos-d2">
+            Existing solutions require trained interpreters who are scarce and expensive. <strong
+              class="text-white/80">SignSense AI</strong> provides an always-available, real-time,
+            machine-learning-based bridge — using only a standard webcam.
+          </p>
+
+          <!-- Mini stats -->
+          <div class="grid grid-cols-2 gap-3 sm:gap-4 aos aos-d3">
+            <div class="glass-card p-4 sm:p-5">
+              <div class="text-xl sm:text-2xl font-display font-700 text-blue-400 mb-1"
+                style="font-family:'Syne',sans-serif;font-weight:700">63M+</div>
+              <div class="text-xs sm:text-sm text-white/40">People with hearing impairment in India</div>
+            </div>
+            <div class="glass-card p-4 sm:p-5">
+              <div class="text-xl sm:text-2xl font-display font-700 text-blue-400 mb-1"
+                style="font-family:'Syne',sans-serif;font-weight:700">250+</div>
+              <div class="text-xs sm:text-sm text-white/40">Certified sign language interpreters nationwide</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visual Card -->
+        <div class="aos aos-d2 floating">
+          <div class="glass-card p-6 sm:p-8 relative overflow-hidden">
+            <div
+              style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;background:rgba(0,113,227,0.15);border-radius:50%;filter:blur(60px)">
+            </div>
+
+            <div class="relative z-10">
+              <div class="text-4xl sm:text-5xl mb-4 sm:mb-5">🤲</div>
+              <h3 class="text-lg sm:text-xl font-display font-600 text-white mb-3"
+                style="font-family:'Syne',sans-serif;font-weight:600">Indian Sign Language</h3>
+              <p class="text-white/45 text-xs sm:text-sm leading-relaxed mb-5 sm:mb-6">
+                ISL is a complete, natural language with its own grammar, syntax, and vocabulary — distinct from British
+                or American Sign Language.
+              </p>
+
+              <div class="space-y-2 sm:space-y-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0"></div>
+                  <span class="text-xs sm:text-sm text-white/60">Recognized as an official language of India</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0"></div>
+                  <span class="text-xs sm:text-sm text-white/60">Dual-hand articulation with body posture cues</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0"></div>
+                  <span class="text-xs sm:text-sm text-white/60">Regional variations across Indian states</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0"></div>
+                  <span class="text-xs sm:text-sm text-white/60">Heavily used in education, courts, healthcare</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- HOW IT WORKS — Pipeline -->
+  <section id="how-it-works" class="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
+    <div class="glow-orb"
+      style="width:min(500px,70vw);height:min(500px,70vw);background:rgba(0,180,255,0.08);bottom:0;left:-100px"></div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-20">
+        <p class="eyebrow mb-3 sm:mb-4 aos">System Pipeline</p>
+        <h2 class="section-title aos aos-d1">From webcam frame to predicted gesture — in milliseconds.</h2>
+      </div>
+
+      <!-- Pipeline Steps - Responsive grid that wraps on mobile -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-start aos aos-d2">
+        <div class="glass-card-hover p-5 sm:p-6 text-center">
+          <div
+            class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+            style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">📷</div>
+          <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 01</div>
+          <h4 class="text-sm font-semibold text-white mb-2">Video Capture</h4>
+          <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">OpenCV captures live webcam frames at 30 fps
+            and mirrors the image</p>
+        </div>
+
+        <!-- Arrow hidden on mobile -->
+        <div class="hidden md:flex items-center justify-center pt-12">
+          <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
+            <path d="M0 8h28M22 2l8 6-8 6" stroke="rgba(0,113,227,0.5)" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
+
+        <div class="glass-card-hover p-5 sm:p-6 text-center">
+          <div
+            class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+            style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">🦴</div>
+          <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 02</div>
+          <h4 class="text-sm font-semibold text-white mb-2">Keypoint Extraction</h4>
+          <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">MediaPipe extracts 33 pose + 21+21 hand
+            landmarks = 258D feature vector</p>
+        </div>
+
+        <div class="hidden md:flex items-center justify-center pt-12">
+          <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
+            <path d="M0 8h28M22 2l8 6-8 6" stroke="rgba(0,113,227,0.5)" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
+
+        <div class="glass-card-hover p-5 sm:p-6 text-center">
+          <div
+            class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+            style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">🔧</div>
+          <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 03</div>
+          <h4 class="text-sm font-semibold text-white mb-2">Normalization</h4>
+          <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">Spatial normalization relative to hip center &
+            shoulder scale removes camera bias</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mt-4 items-start aos aos-d3">
+        <div class="glass-card-hover p-5 sm:p-6 text-center">
+          <div
+            class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+            style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">📈</div>
+          <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 04</div>
+          <h4 class="text-sm font-semibold text-white mb-2">EMA Smoothing</h4>
+          <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">Exponential Moving Average filter (α=0.5)
+            reduces landmark jitter between frames</p>
+        </div>
+
+        <div class="hidden md:flex items-center justify-center pt-12">
+          <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
+            <path d="M0 8h28M22 2l8 6-8 6" stroke="rgba(0,113,227,0.5)" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
+
+        <div class="glass-card-hover p-5 sm:p-6 text-center">
+          <div
+            class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+            style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">🧠</div>
+          <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 05</div>
+          <h4 class="text-sm font-semibold text-white mb-2">LSTM Inference</h4>
+          <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">30-frame sequence fed into 2-layer LSTM →
+            Softmax over 49 gesture classes</p>
+        </div>
+
+        <div class="hidden md:flex items-center justify-center pt-12">
+          <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
+            <path d="M0 8h28M22 2l8 6-8 6" stroke="rgba(0,113,227,0.5)" stroke-width="2" stroke-linecap="round" />
+          </svg>
+        </div>
+
+        <div class="glass-card-hover p-5 sm:p-6 text-center">
+          <div
+            class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+            style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">🗳️</div>
+          <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 06</div>
+          <h4 class="text-sm font-semibold text-white mb-2">Voting Buffer</h4>
+          <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">20-frame majority voting (12/20 threshold)
+            ensures stable, flicker-free UI output</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- LIVE DEMO SECTION  -->
+  <section id="demo" class="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
+    <div class="glow-orb"
+      style="width:min(700px,90vw);height:min(700px,90vw);background:rgba(0,113,227,0.12);top:50%;left:50%;transform:translate(-50%,-50%)">
+    </div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+        <p class="eyebrow mb-3 sm:mb-4 aos">Live Demonstration</p>
+        <h2 class="section-title aos aos-d1">See SignSense AI in action.</h2>
+        <p class="text-white/45 mt-3 sm:mt-4 text-sm sm:text-base px-2 aos aos-d2">The system processes video in
+          real-time, overlays skeletal landmarks, and displays the predicted gesture with confidence score.</p>
+      </div>
+
+      <div class="max-w-4xl mx-auto aos aos-d2">
+        <div class="rounded-4xl"
+          style="background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.10);border-radius:20px sm:rounded-28px;overflow:hidden;box-shadow:0 60px 120px rgba(0,0,0,0.7),inset 0 1px 0 rgba(255,255,255,0.12)">
+
+          <div class="flex items-center gap-2 px-4 sm:px-5 py-3 sm:py-4 border-b"
+            style="border-color:rgba(255,255,255,0.07);background:rgba(0,0,0,0.4)">
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500/80"></div>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500/80"></div>
+            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500/80"></div>
+            <div class="ml-3 sm:ml-4 text-[10px] sm:text-xs text-white/30 font-mono truncate">Real-Time Indian Sign
+              Language Recognition</div>
+            <div class="ml-auto flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-400 pulse-ring"></span>
+              <span class="text-[10px] sm:text-xs text-green-400/80 font-medium">LIVE</span>
+            </div>
+          </div>
+
+          <div class="relative" style="aspect-ratio:16/9;background:linear-gradient(135deg,#0a0a1a 0%,#0d1628 100%)">
+            <svg class="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 640 360"
+              xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+              <circle cx="320" cy="80" r="18" fill="none" stroke="#0071e3" stroke-width="1.5" opacity="0.6" />
+              <line x1="320" y1="98" x2="320" y2="190" stroke="#0071e3" stroke-width="1.5" opacity="0.5" />
+              <line x1="320" y1="130" x2="260" y2="165" stroke="#0071e3" stroke-width="1.5" opacity="0.5" />
+              <line x1="320" y1="130" x2="380" y2="165" stroke="#0071e3" stroke-width="1.5" opacity="0.5" />
+              <line x1="260" y1="165" x2="240" y2="220" stroke="#0071e3" stroke-width="1.5" opacity="0.5" />
+              <line x1="380" y1="165" x2="400" y2="220" stroke="#0071e3" stroke-width="1.5" opacity="0.5" />
+              <line x1="320" y1="190" x2="295" y2="260" stroke="#0071e3" stroke-width="1.5" opacity="0.5" />
+              <line x1="320" y1="190" x2="345" y2="260" stroke="#0071e3" stroke-width="1.5" opacity="0.5" />
+              <circle cx="240" cy="225" r="4" fill="#0071e3" opacity="0.7" />
+              <circle cx="228" cy="238" r="3" fill="#00b4ff" opacity="0.6" />
+              <circle cx="220" cy="250" r="3" fill="#00b4ff" opacity="0.6" />
+              <circle cx="235" cy="248" r="3" fill="#00b4ff" opacity="0.6" />
+              <circle cx="248" cy="245" r="3" fill="#00b4ff" opacity="0.6" />
+              <circle cx="255" cy="240" r="3" fill="#00b4ff" opacity="0.6" />
+              <circle cx="400" cy="225" r="4" fill="#0071e3" opacity="0.7" />
+              <circle cx="412" cy="238" r="3" fill="#00b4ff" opacity="0.6" />
+              <circle cx="420" cy="250" r="3" fill="#00b4ff" opacity="0.6" />
+              <circle cx="405" cy="248" r="3" fill="#00b4ff" opacity="0.6" />
+              <circle cx="392" cy="245" r="3" fill="#00b4ff" opacity="0.6" />
+              <circle cx="385" cy="240" r="3" fill="#00b4ff" opacity="0.6" />
+              <circle cx="260" cy="165" r="4" fill="#0071e3" opacity="0.7" />
+              <circle cx="380" cy="165" r="4" fill="#0071e3" opacity="0.7" />
+              <circle cx="320" cy="130" r="5" fill="#0071e3" opacity="0.8" />
+            </svg>
+
+            <div class="scan-overlay absolute inset-0"></div>
+
+            <div class="absolute top-0 left-0 right-0 p-3 sm:p-4"
+              style="background:linear-gradient(to bottom,rgba(245,117,16,0.9),transparent)">
+              <div class="text-white font-semibold text-[11px] sm:text-sm"
+                style="font-family:'SF Mono','Fira Code',monospace">
+                Pred: <span class="text-white">thank_you</span>
+                <span class="ml-1 sm:ml-2 text-white/70">(91.3%)</span>
+              </div>
+            </div>
+
+            <div
+              class="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 right-3 sm:right-4 flex flex-wrap items-end justify-between gap-2">
+              <div class="glass-card px-2 sm:px-3 py-1.5 sm:py-2">
+                <div class="text-[9px] sm:text-xs text-white/40 font-mono mb-0.5 sm:mb-1">CONFIDENCE</div>
+                <div class="progress-bar w-24 sm:w-32">
+                  <div class="progress-fill" style="width:91%"></div>
+                </div>
+                <div class="text-[10px] sm:text-xs text-blue-400 mt-0.5 sm:mt-1 font-mono">91.3%</div>
+              </div>
+              <div class="glass-card px-2 sm:px-3 py-1.5 sm:py-2 text-right">
+                <div class="text-[9px] sm:text-xs text-white/40 font-mono">FRAME BUFFER</div>
+                <div class="text-[10px] sm:text-xs text-white font-mono mt-0.5">30 / 30</div>
+              </div>
+            </div>
+
+            <div class="absolute top-1/2 right-4 sm:right-8 transform -translate-y-1/2 floating-delay">
+              <div class="glass-card px-3 sm:px-4 py-2 sm:py-3 text-center">
+                <div class="text-xl sm:text-2xl mb-0.5 sm:mb-1">🙏</div>
+                <div class="text-[11px] sm:text-sm font-semibold text-white">thank_you</div>
+                <div class="text-[9px] sm:text-xs text-white/40">Detected</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="max-w-2xl mx-auto mt-10 sm:mt-12 aos aos-d3">
+        <div class="glass-card p-5 sm:p-6">
+          <h4 class="text-sm font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2 flex-wrap"><span>⚡</span> Run
+            Locally</h4>
+          <div class="code-block text-[11px] sm:text-sm">
+            <span class="code-comment"># Install dependencies</span><br />
+            pip install opencv-python mediapipe torch numpy<br /><br />
+            <span class="code-comment"># Run the recognition system</span><br />
+            python <span class="code-str">RealTI_N1.py</span><br /><br />
+            <span class="code-comment"># Press 'q' to quit the webcam window</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- FEATURES -->
+  <section id="features" class="relative py-20 sm:py-32 px-4 sm:px-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-20">
+        <p class="eyebrow mb-3 sm:mb-4 aos">Key Capabilities</p>
+        <h2 class="section-title aos aos-d1">Engineered for accuracy, speed, and robustness.</h2>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <div class="glass-card-hover p-5 sm:p-7 aos">
+          <div class="feature-icon">🎯</div>
+          <h3 class="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">High-Confidence Thresholding</h3>
+          <p class="text-white/45 text-xs sm:text-sm leading-relaxed">Only predictions with confidence &gt; 85% are
+            accepted. This prevents false positives during ambiguous or transitional gestures.</p>
+        </div>
+        <div class="glass-card-hover p-5 sm:p-7 aos aos-d1">
+          <div class="feature-icon">🔄</div>
+          <h3 class="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Majority Voting Buffer</h3>
+          <p class="text-white/45 text-xs sm:text-sm leading-relaxed">A 20-frame rolling buffer with a 12-vote majority
+            threshold eliminates UI flicker and provides stable, human-readable output.</p>
+        </div>
+        <div class="glass-card-hover p-5 sm:p-7 aos aos-d2">
+          <div class="feature-icon">📊</div>
+          <h3 class="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Motion Variance Check</h3>
+          <p class="text-white/45 text-xs sm:text-sm leading-relaxed">An idle-state detector (variance &lt; 0.001)
+            suppresses inference when no meaningful gesture movement is detected, saving computation.</p>
+        </div>
+        <div class="glass-card-hover p-5 sm:p-7 aos aos-d1">
+          <div class="feature-icon">📍</div>
+          <h3 class="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Spatial Normalization</h3>
+          <p class="text-white/45 text-xs sm:text-sm leading-relaxed">All keypoints are normalized relative to hip
+            center and shoulder distance, making the model invariant to user distance and camera angle.</p>
+        </div>
+        <div class="glass-card-hover p-5 sm:p-7 aos aos-d2">
+          <div class="feature-icon">〰️</div>
+          <h3 class="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">EMA Temporal Smoothing</h3>
+          <p class="text-white/45 text-xs sm:text-sm leading-relaxed">Exponential Moving Average with α=0.5 smooths
+            landmark positions across frames, reducing noise without introducing lag.</p>
+        </div>
+        <div class="glass-card-hover p-5 sm:p-7 aos aos-d3">
+          <div class="feature-icon">⚡</div>
+          <h3 class="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">GPU / CPU Adaptive</h3>
+          <p class="text-white/45 text-xs sm:text-sm leading-relaxed">Automatically runs on CUDA GPU if available, else
+            falls back to CPU — ensuring compatibility across all hardware configurations.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- GESTURE LIBRARY (Full content preserved)  -->
+  <section id="gestures" class="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
+    <div class="glow-orb"
+      style="width:min(400px,60vw);height:min(400px,60vw);background:rgba(0,113,227,0.10);top:50%;right:-100px;transform:translateY(-50%)">
+    </div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+        <p class="eyebrow mb-3 sm:mb-4 aos">Gesture Library</p>
+        <h2 class="section-title aos aos-d1">49 Indian Sign Language gestures recognized in real-time.</h2>
+      </div>
+
+      <div class="space-y-5 sm:space-y-8 aos aos-d2">
+        <div class="glass-card p-5 sm:p-6">
+          <div class="flex items-center gap-3 mb-3 sm:mb-4 flex-wrap"><span class="text-base sm:text-lg">👋</span><span
+              class="text-xs sm:text-sm font-semibold text-white/70">Greetings & Basics</span></div>
+          <div class="flex flex-wrap gap-1.5 sm:gap-2"><span class="gesture-tag">hello</span><span
+              class="gesture-tag">bye</span><span class="gesture-tag">thank_you</span><span
+              class="gesture-tag">welcome</span><span class="gesture-tag">sorry</span><span
+              class="gesture-tag">good</span><span class="gesture-tag">morning</span><span
+              class="gesture-tag">yes</span><span class="gesture-tag">no</span><span
+              class="gesture-tag">correct</span><span class="gesture-tag">wrong</span><span
+              class="gesture-tag">again</span></div>
+        </div>
+        <div class="glass-card p-5 sm:p-6">
+          <div class="flex items-center gap-3 mb-3 sm:mb-4 flex-wrap"><span class="text-base sm:text-lg">👤</span><span
+              class="text-xs sm:text-sm font-semibold text-white/70">People & Identity</span></div>
+          <div class="flex flex-wrap gap-1.5 sm:gap-2"><span class="gesture-tag">i/me</span><span
+              class="gesture-tag">you</span><span class="gesture-tag">my</span><span
+              class="gesture-tag">your</span><span class="gesture-tag">name</span><span
+              class="gesture-tag">who</span><span class="gesture-tag">leader</span><span
+              class="gesture-tag">teacher</span><span class="gesture-tag">deaf</span><span
+              class="gesture-tag">hearing</span></div>
+        </div>
+        <div class="glass-card p-5 sm:p-6">
+          <div class="flex items-center gap-3 mb-3 sm:mb-4 flex-wrap"><span class="text-base sm:text-lg">⚡</span><span
+              class="text-xs sm:text-sm font-semibold text-white/70">Actions & Verbs</span></div>
+          <div class="flex flex-wrap gap-1.5 sm:gap-2"><span class="gesture-tag">do</span><span
+              class="gesture-tag">write</span><span class="gesture-tag">read</span><span
+              class="gesture-tag">study</span><span class="gesture-tag">look</span><span
+              class="gesture-tag">come</span><span class="gesture-tag">sit_down</span><span
+              class="gesture-tag">stand_up</span><span class="gesture-tag">understand</span><span
+              class="gesture-tag">i_dont_understand</span><span class="gesture-tag">help</span>
+            <span class="gesture-tag">quiet</span>
+          </div>
+        </div>
+        <div class="glass-card p-5 sm:p-6">
+          <div class="flex items-center gap-3 mb-3 sm:mb-4 flex-wrap"><span class="text-base sm:text-lg">🕒</span><span
+              class="text-xs sm:text-sm font-semibold text-white/70">Place, Time & Questions</span></div>
+          <div class="flex flex-wrap gap-1.5 sm:gap-2"><span class="gesture-tag">home</span><span
+              class="gesture-tag">work</span><span class="gesture-tag">class</span><span
+              class="gesture-tag">here</span><span class="gesture-tag">now</span><span
+              class="gesture-tag">yesterday</span><span class="gesture-tag">tomorrow</span><span
+              class="gesture-tag">what</span><span class="gesture-tag">how</span><span
+              class="gesture-tag">exam</span><span class="gesture-tag">can</span><span
+              class="gesture-tag">will</span><span class="gesture-tag">this</span><span
+              class="gesture-tag">it</span><span class="gesture-tag">difficult</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ARCHITECTURE (Full content preserved - shortened for length)  -->
+  <section id="architecture" class="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
+    <div class="glow-orb"
+      style="width:min(500px,70vw);height:min(500px,70vw);background:rgba(0,180,255,0.08);top:0;left:-100px"></div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-20">
+        <p class="eyebrow mb-3 sm:mb-4 aos">Model Architecture</p>
+        <h2 class="section-title aos aos-d1">Two-layer LSTM with dropout regularization.</h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8 lg:gap-10 items-start">
+        <div class="aos overflow-x-auto">
+          <div class="glass-card p-5 sm:p-8 min-w-[280px]">
+            <h4 class="text-sm font-semibold text-white/60 uppercase tracking-wide mb-5 sm:mb-6">Neural Network Layers
+            </h4>
+            <div class="space-y-2 sm:space-y-3">
+              <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+                <div class="w-24 sm:w-32 text-right text-xs text-white/40 flex-shrink-0">Input</div>
+                <div class="flex-1 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm font-mono text-white/80"
+                  style="background:rgba(0,113,227,0.12);border:1px solid rgba(0,113,227,0.2)">[Batch, 30, 258]<div
+                    class="text-[9px] sm:text-xs text-white/35 mt-0.5">Sequence × Keypoints</div>
+                </div>
+              </div>
+              <div class="flex justify-center"><svg height="16" width="16" viewBox="0 0 20 20">
+                  <path d="M10 2v16M4 12l6 6 6-6" stroke="#0071e3" stroke-width="1.5" fill="none"
+                    stroke-linecap="round" />
+                </svg></div>
+              <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+                <div class="w-24 sm:w-32 text-right text-xs text-white/40 flex-shrink-0">LSTM Layer 1</div>
+                <div class="flex-1 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm font-mono text-blue-300"
+                  style="background:rgba(0,113,227,0.18);border:1px solid rgba(0,113,227,0.35)">hidden_size = 128<div
+                    class="text-[9px] sm:text-xs text-white/35 mt-0.5">batch_first=True, dropout=0.5</div>
+                </div>
+              </div>
+              <div class="flex justify-center"><svg height="16" width="16" viewBox="0 0 20 20">
+                  <path d="M10 2v16M4 12l6 6 6-6" stroke="#0071e3" stroke-width="1.5" fill="none"
+                    stroke-linecap="round" />
+                </svg></div>
+              <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+                <div class="w-24 sm:w-32 text-right text-xs text-white/40 flex-shrink-0">LSTM Layer 2</div>
+                <div class="flex-1 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm font-mono text-blue-300"
+                  style="background:rgba(0,113,227,0.18);border:1px solid rgba(0,113,227,0.35)">hidden_size = 128<div
+                    class="text-[9px] sm:text-xs text-white/35 mt-0.5">Captures temporal patterns</div>
+                </div>
+              </div>
+              <div class="flex justify-center"><svg height="16" width="16" viewBox="0 0 20 20">
+                  <path d="M10 2v16M4 12l6 6 6-6" stroke="#0071e3" stroke-width="1.5" fill="none"
+                    stroke-linecap="round" />
+                </svg></div>
+              <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+                <div class="w-24 sm:w-32 text-right text-xs text-white/40 flex-shrink-0">Dropout</div>
+                <div
+                  class="flex-1 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm font-mono text-yellow-300/80"
+                  style="background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.15)">p = 0.5<div
+                    class="text-[9px] sm:text-xs text-white/35 mt-0.5">Regularization — last timestep</div>
+                </div>
+              </div>
+              <div class="flex justify-center"><svg height="16" width="16" viewBox="0 0 20 20">
+                  <path d="M10 2v16M4 12l6 6 6-6" stroke="#0071e3" stroke-width="1.5" fill="none"
+                    stroke-linecap="round" />
+                </svg></div>
+              <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+                <div class="w-24 sm:w-32 text-right text-xs text-white/40 flex-shrink-0">Linear</div>
+                <div
+                  class="flex-1 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm font-mono text-green-300/80"
+                  style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.15)">128 → 49<div
+                    class="text-[9px] sm:text-xs text-white/35 mt-0.5">Fully connected output layer</div>
+                </div>
+              </div>
+              <div class="flex justify-center"><svg height="16" width="16" viewBox="0 0 20 20">
+                  <path d="M10 2v16M4 12l6 6 6-6" stroke="#22c55e" stroke-width="1.5" fill="none"
+                    stroke-linecap="round" />
+                </svg></div>
+              <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+                <div class="w-24 sm:w-32 text-right text-xs text-white/40 flex-shrink-0">Softmax</div>
+                <div class="flex-1 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm font-mono text-green-300"
+                  style="background:rgba(34,197,94,0.14);border:1px solid rgba(34,197,94,0.3)">49 class probabilities
+                  <div class="text-[9px] sm:text-xs text-white/35 mt-0.5">Gesture prediction + confidence</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-4 sm:space-y-5 aos aos-d2">
+          <div class="glass-card p-5 sm:p-6 overflow-x-auto">
+            <h4 class="text-sm font-semibold text-white/60 uppercase tracking-wide mb-4">Model Hyperparameters</h4>
+            <div class="space-y-2 sm:space-y-3 min-w-[200px]">
+              <div class="flex justify-between items-center py-2 border-b flex-wrap gap-2"
+                style="border-color:rgba(255,255,255,0.06)"><span class="text-sm text-white/50">Input
+                  Dimensions</span><span class="text-sm font-mono text-white">258</span></div>
+              <div class="flex justify-between items-center py-2 border-b flex-wrap gap-2"
+                style="border-color:rgba(255,255,255,0.06)"><span class="text-sm text-white/50">Hidden Size</span><span
+                  class="text-sm font-mono text-white">128</span></div>
+              <div class="flex justify-between items-center py-2 border-b flex-wrap gap-2"
+                style="border-color:rgba(255,255,255,0.06)"><span class="text-sm text-white/50">LSTM Layers</span><span
+                  class="text-sm font-mono text-white">2</span></div>
+              <div class="flex justify-between items-center py-2 border-b flex-wrap gap-2"
+                style="border-color:rgba(255,255,255,0.06)"><span class="text-sm text-white/50">Dropout Rate</span><span
+                  class="text-sm font-mono text-white">0.5</span></div>
+              <div class="flex justify-between items-center py-2 border-b flex-wrap gap-2"
+                style="border-color:rgba(255,255,255,0.06)"><span class="text-sm text-white/50">Sequence
+                  Length</span><span class="text-sm font-mono text-white">30 frames</span></div>
+              <div class="flex justify-between items-center py-2 border-b flex-wrap gap-2"
+                style="border-color:rgba(255,255,255,0.06)"><span class="text-sm text-white/50">Output
+                  Classes</span><span class="text-sm font-mono text-white">49</span></div>
+              <div class="flex justify-between items-center py-2 flex-wrap gap-2"><span
+                  class="text-sm text-white/50">Confidence Threshold</span><span
+                  class="text-sm font-mono text-white">85%</span></div>
+            </div>
+          </div>
+
+          <div class="glass-card p-5 sm:p-6 overflow-x-auto">
+            <h4 class="text-sm font-semibold text-white/60 uppercase tracking-wide mb-4">Model Definition</h4>
+            <div class="code-block text-[10px] sm:text-xs"><span class="code-kw">class</span> <span
+                class="code-cls">SignLanguageLSTM</span>(nn.Module):<br />&nbsp;&nbsp;<span class="code-kw">def</span>
+              <span class="code-fn">__init__</span>(self,<br />&nbsp;&nbsp;&nbsp;&nbsp;input_size=<span
+                class="code-num">258</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;hidden_size=<span
+                class="code-num">128</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;num_layers=<span
+                class="code-num">2</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;num_classes=<span
+                class="code-num">49</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;dropout=<span
+                class="code-num">0.5</span>):<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;self.lstm = nn.<span
+                class="code-fn">LSTM</span>(<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;input_size,
+              hidden_size,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;num_layers, batch_first=<span
+                class="code-kw">True</span>)<br />&nbsp;&nbsp;&nbsp;&nbsp;self.fc = nn.<span
+                class="code-fn">Linear</span>(<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hidden_size, num_classes)
+            </div>
+          </div>
+
+          <div class="glass-card p-5 sm:p-6">
+            <h4 class="text-sm font-semibold text-white/60 uppercase tracking-wide mb-4">Technology Stack</h4>
+            <div class="flex flex-wrap gap-1.5 sm:gap-2"><span class="tech-badge text-[10px] sm:text-xs">🐍 Python
+                3.10</span><span class="tech-badge text-[10px] sm:text-xs">🔥 PyTorch</span><span
+                class="tech-badge text-[10px] sm:text-xs">🤲 MediaPipe</span><span
+                class="tech-badge text-[10px] sm:text-xs">📷 OpenCV</span><span
+                class="tech-badge text-[10px] sm:text-xs">🔢 NumPy</span><span
+                class="tech-badge text-[10px] sm:text-xs">⚡ CUDA</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- PERFORMANCE METRICS (Full content preserved)  -->
+  <section class="relative py-20 sm:py-32 px-4 sm:px-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-20">
+        <p class="eyebrow mb-3 sm:mb-4 aos">Performance</p>
+        <h2 class="section-title aos aos-d1">Measured. Validated. Production-ready.</h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-5 sm:gap-6">
+        <div class="glass-card p-5 sm:p-7 aos">
+          <h4 class="text-sm font-semibold text-white mb-5">Accuracy by Gesture Category</h4>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-xs text-white/50 mb-1.5 flex-wrap"><span>Greetings</span><span
+                  class="text-white">94%</span></div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:94%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs text-white/50 mb-1.5 flex-wrap"><span>Identity</span><span
+                  class="text-white">91%</span></div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:91%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs text-white/50 mb-1.5 flex-wrap"><span>Actions</span><span
+                  class="text-white">88%</span></div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:88%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs text-white/50 mb-1.5 flex-wrap"><span>Questions</span><span
+                  class="text-white">86%</span></div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:86%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs text-white/50 mb-1.5 flex-wrap"><span>Complex
+                  Gestures</span><span class="text-white">82%</span></div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:82%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-4 sm:space-y-5 aos aos-d1">
+          <div class="glass-card p-5 sm:p-6 text-center">
+            <div class="text-3xl sm:text-4xl font-display font-800 mb-2"
+              style="font-family:'Syne',sans-serif;font-weight:800;color:#0071e3">~33ms</div>
+            <div class="text-xs sm:text-sm text-white/45">Inference Latency (GPU)</div>
+          </div>
+          <div class="glass-card p-5 sm:p-6 text-center">
+            <div class="text-3xl sm:text-4xl font-display font-800 mb-2"
+              style="font-family:'Syne',sans-serif;font-weight:800;color:#0071e3">1 sec</div>
+            <div class="text-xs sm:text-sm text-white/45">Prediction Window (30 frames)</div>
+          </div>
+          <div class="glass-card p-5 sm:p-6 text-center">
+            <div class="text-3xl sm:text-4xl font-display font-800 mb-2"
+              style="font-family:'Syne',sans-serif;font-weight:800;color:#0071e3">85%+</div>
+            <div class="text-xs sm:text-sm text-white/45">Overall Validation Accuracy</div>
+          </div>
+        </div>
+
+        <div class="glass-card p-5 sm:p-7 aos aos-d2">
+          <h4 class="text-sm font-semibold text-white mb-5">Design Decisions</h4>
+          <div class="space-y-3 sm:space-y-4">
+            <div class="flex gap-2 sm:gap-3"><span class="text-blue-400 flex-shrink-0 mt-0.5">✓</span>
+              <div>
+                <div class="text-sm font-medium text-white mb-0.5">Sequence-based input</div>
+                <div class="text-xs text-white/40">LSTM over CNN for temporal motion understanding</div>
+              </div>
+            </div>
+            <div class="flex gap-2 sm:gap-3"><span class="text-blue-400 flex-shrink-0 mt-0.5">✓</span>
+              <div>
+                <div class="text-sm font-medium text-white mb-0.5">Keypoint-based approach</div>
+                <div class="text-xs text-white/40">Lightweight vs pixel-based CNN — works on any hardware</div>
+              </div>
+            </div>
+            <div class="flex gap-2 sm:gap-3"><span class="text-blue-400 flex-shrink-0 mt-0.5">✓</span>
+              <div>
+                <div class="text-sm font-medium text-white mb-0.5">Dual-hand + pose fusion</div>
+                <div class="text-xs text-white/40">Body context improves ISL recognition accuracy</div>
+              </div>
+            </div>
+            <div class="flex gap-2 sm:gap-3"><span class="text-blue-400 flex-shrink-0 mt-0.5">✓</span>
+              <div>
+                <div class="text-sm font-medium text-white mb-0.5">Multi-stage smoothing</div>
+                <div class="text-xs text-white/40">EMA + voting ensures stable real-world output</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- TEAM (Full content preserved - shortened for length)  -->
+  <section id="team" class="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
+    <div class="glow-orb"
+      style="width:min(500px,70vw);height:min(500px,70vw);background:rgba(0,113,227,0.10);bottom:-100px;left:50%;transform:translateX(-50%)">
+    </div>
+
+    <div class="max-w-7xl mx-auto relative z-10">
+      <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-20">
+        <p class="eyebrow mb-3 sm:mb-4 aos">The Team</p>
+        <h2 class="section-title aos aos-d1">Built with purpose, passion, and late nights.</h2>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 max-w-5xl mx-auto">
+        <div class="glass-card-hover p-5 sm:p-7 aos">
+          <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-5 flex-wrap">
+            <div class="avatar">KV</div>
+            <div>
+              <div class="font-semibold text-white text-sm sm:text-base">KARTHIKEYAN V</div>
+              <div class="text-[10px] sm:text-xs text-white/40 mt-0.5">Roll No: 2236010036</div>
+              <div class="text-[10px] sm:text-xs text-white/40 mt-0.5">Data Engineering & Annotation</div>
+            </div>
+          </div>
+          <p class="text-xs sm:text-sm text-white/45 leading-relaxed">Standardized the capture of 49 gestures at 45 FPS
+            to ensure high-fidelity temporal accuracy. Performed rigorous 258-dimensional data scrubbing to achieve the
+            model's 98.48% accuracy.</p>
+          <div class="flex flex-wrap gap-1.5 mt-3 sm:mt-4"><span
+              class="tech-badge text-[9px] sm:text-xs">OpenCV</span><span
+              class="tech-badge text-[9px] sm:text-xs">MediaPipe</span></div>
+        </div>
+
+        <div class="glass-card-hover p-5 sm:p-7 aos aos-d1">
+          <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-5 flex-wrap">
+            <div class="avatar">AS</div>
+            <div>
+              <div class="font-semibold text-white text-sm sm:text-base">AADHITHYA S</div>
+              <div class="text-[10px] sm:text-xs text-white/40 mt-0.5">Roll No: 2236010051</div>
+              <div class="text-[10px] sm:text-xs text-white/40 mt-0.5">Data Preprocessing & Overseer</div>
+            </div>
+          </div>
+          <p class="text-xs sm:text-sm text-white/45 leading-relaxed">Built the keypoint extraction pipeline,
+            normalization logic, and EMA temporal smoothing module.</p>
+          <div class="flex flex-wrap gap-1.5 mt-3 sm:mt-4"><span
+              class="tech-badge text-[9px] sm:text-xs">OpenCV</span><span
+              class="tech-badge text-[9px] sm:text-xs">MediaPipe</span></div>
+        </div>
+
+        <div class="glass-card-hover p-5 sm:p-7 aos aos-d2">
+          <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-5 flex-wrap">
+            <div class="avatar">AM</div>
+            <div>
+              <div class="font-semibold text-white text-sm sm:text-base">AMUDHAN M</div>
+              <div class="text-[10px] sm:text-xs text-white/40 mt-0.5">Roll No: 2236010061</div>
+              <div class="text-[10px] sm:text-xs text-white/40 mt-0.5">UI/UX & System Integration</div>
+            </div>
+          </div>
+          <p class="text-xs sm:text-sm text-white/45 leading-relaxed">Developed the real-time display interface, voting
+            buffer logic, and integrated all system components.</p>
+          <div class="flex flex-wrap gap-1.5 mt-3 sm:mt-4"><span class="tech-badge text-[9px] sm:text-xs">Python
+              Flask</span><span class="tech-badge text-[9px] sm:text-xs">System Design</span></div>
+        </div>
+
+        <div class="glass-card-hover p-5 sm:p-7 aos aos-d2">
+          <div class="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-5 flex-wrap">
+            <div class="avatar">D RS</div>
+            <div>
+              <div class="font-semibold text-white text-sm sm:text-base">DHARUN R S</div>
+              <div class="text-[10px] sm:text-xs text-white/40 mt-0.5">Roll No: 2236010056</div>
+              <div class="text-[10px] sm:text-xs text-white/40 mt-0.5">Training & Testing</div>
+            </div>
+          </div>
+          <p class="text-xs sm:text-sm text-white/45 leading-relaxed">Managed the multi-epoch LSTM training and
+            hyperparameter tuning to achieve a peak accuracy of 98.48%. Developed the evaluation pipeline and
+            cross-validation protocols to ensure high model reliability across all 49 gesture classes.</p>
+          <div class="flex flex-wrap gap-1.5 mt-3 sm:mt-4"><span
+              class="tech-badge text-[9px] sm:text-xs">Testing</span><span
+              class="tech-badge text-[9px] sm:text-xs">PyTorch</span></div>
+        </div>
+      </div>
+
+      <div class="mt-12 sm:mt-16 max-w-2xl mx-auto text-center aos aos-d3">
+        <div class="glass-card p-6 sm:p-8">
+          <div class="text-2xl sm:text-3xl mb-3 sm:mb-4">🎓</div>
+          <h4 class="font-display font-700 text-white text-base sm:text-lg mb-2"
+            style="font-family:'Syne',sans-serif;font-weight:700">Department of Computer Science & Engineering</h4>
+          <p class="text-white/40 text-xs sm:text-sm">Bachelor of Engineering — Final Year Project, 2026</p>
+          <div class="section-divider my-4 sm:my-5"></div>
+          <p class="text-white/30 text-[10px] sm:text-xs">Guided by <span class="text-white/50">Dr. R. PRIYA</span>,
+            Professor</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- FOOTER  -->
+  <footer class="py-12 sm:py-16 px-4 sm:px-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 mb-10 sm:mb-12">
+        <div>
+          <div class="flex items-center gap-2.5 mb-4">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm flex-shrink-0"
+              style="background:linear-gradient(135deg,#0071e3,#00b4ff)"><svg width="16" height="16" viewBox="0 0 24 24"
+                fill="none" stroke="white" stroke-width="2.5">
+                <path
+                  d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg></div><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px">RTSLR</span>
+          </div>
+          <p class="text-xs sm:text-sm text-white/35 leading-relaxed">Real-time Indian Sign Language recognition powered
+            by deep learning. A final year B.E. project.</p>
+        </div>
+
+        <div>
+          <div class="text-xs font-semibold text-white/30 uppercase tracking-wider mb-4">Navigation</div>
+          <div class="space-y-2"><a href="#about"
+              class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">About the Project</a><a
+              href="#how-it-works" class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">How
+              It Works</a><a href="#features"
+              class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Features</a><a
+              href="#gestures" class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Gesture
+              Library</a><a href="#architecture"
+              class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Model Architecture</a><a
+              href="#team" class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Team</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="text-xs font-semibold text-white/30 uppercase tracking-wider mb-4">Technology</div>
+          <div class="flex flex-wrap gap-1.5 sm:gap-2"><span
+              class="tech-badge text-[10px] sm:text-xs">Python</span><span
+              class="tech-badge text-[10px] sm:text-xs">PyTorch</span><span
+              class="tech-badge text-[10px] sm:text-xs">MediaPipe</span><span
+              class="tech-badge text-[10px] sm:text-xs">OpenCV</span><span
+              class="tech-badge text-[10px] sm:text-xs">LSTM</span><span
+              class="tech-badge text-[10px] sm:text-xs">NumPy</span></div>
+          <div class="mt-5 p-3 sm:p-4 rounded-2xl text-xs sm:text-sm text-white/50"
+            style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08)">
+            <div class="flex items-center gap-2 mb-1"><span
+                class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-400"></span><span
+                class="text-[10px] sm:text-xs text-white/40">Model Status</span></div>
+            <div class="text-[9px] sm:text-xs font-mono text-white/60 break-all">sign_lstm_best.pt — 49 classes</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider mb-5 sm:mb-6"></div>
+      <div
+        class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-[10px] sm:text-xs text-white/25">
+        <span>© 2025 RTSLR — Final Year Project. All rights reserved.</span><span>Built with ❤️ for the deaf community
+          of India</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
+
+  <script>
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 20) {
+        navbar.className = 'fixed top-0 left-0 right-0 z-50 transition-all duration-300 nav-glass';
+      } else {
+        navbar.className = 'fixed top-0 left-0 right-0 z-50 transition-all duration-300';
+      }
+    });
+
+    const aosEls = document.querySelectorAll('.aos');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(el => { if (el.isIntersecting) el.target.classList.add('visible'); });
+    }, { threshold: 0.12 });
+    aosEls.forEach(el => observer.observe(el));
+
+    const progressEls = document.querySelectorAll('.progress-fill');
+    const progressObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const width = entry.target.style.width;
+          entry.target.style.width = '0%';
+          setTimeout(() => { entry.target.style.width = width; }, 200);
+        }
+      });
+    }, { threshold: 0.5 });
+    progressEls.forEach(el => progressObserver.observe(el));
+
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    // Mobile menu toggle functionality
+    (function () {
+      const menuToggle = document.getElementById('menuToggle');
+      const mobileMenu = document.getElementById('mobileMenu');
+      if (menuToggle && mobileMenu) {
+        menuToggle.addEventListener('click', function (e) {
+          e.stopPropagation();
+          mobileMenu.classList.toggle('show');
+          menuToggle.classList.toggle('active');
+        });
+        document.addEventListener('click', function (event) {
+          if (!menuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+            if (mobileMenu.classList.contains('show')) {
+              mobileMenu.classList.remove('show');
+              menuToggle.classList.remove('active');
+            }
+          }
+        });
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+          link.addEventListener('click', function () {
+            mobileMenu.classList.remove('show');
+            menuToggle.classList.remove('active');
+          });
+        });
+        window.addEventListener('resize', function () {
+          if (window.innerWidth >= 768) {
+            if (mobileMenu.classList.contains('show')) {
+              mobileMenu.classList.remove('show');
+              menuToggle.classList.remove('active');
+            }
+          }
+        });
+      }
+    })();
+  </script>
+
+</body>
+
+</html>

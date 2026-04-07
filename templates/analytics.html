@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Session Analytics — RTSLR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    /* Custom CSS only for things Tailwind cannot handle */
+    :root {
+      --bg: #04070f;
+      --surface: #0b1121;
+      --card: #101828;
+      --border: #1e2d47;
+      --accent: #00e5ff;
+      --accent2: #7c3aed;
+      --green: #00ffa3;
+      --orange: #ff8c42;
+      --red: #ff4444;
+      --text: #e8edf5;
+      --muted: #5a6a82;
+    }
+
+    /* Noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Custom animations */
+    @keyframes pulse-dot {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: .5;
+        transform: scale(1.4);
+      }
+    }
+
+    .animate-pulse-dot {
+      animation: pulse-dot 2s infinite;
+    }
+
+    /* Custom scrollbar */
+    .custom-scroll::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 99px;
+    }
+
+    /* Custom scrollbar styling */
+    #historyScrollContainer::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    #historyScrollContainer::-webkit-scrollbar-track {
+      background: rgba(30, 45, 71, 0.3);
+      border-radius: 10px;
+    }
+
+    #historyScrollContainer::-webkit-scrollbar-thumb {
+      background: #1e2d47;
+      border-radius: 10px;
+    }
+
+    #historyScrollContainer::-webkit-scrollbar-thumb:hover {
+      background: #00e5ff;
+    }
+
+    /* Firefox scrollbar */
+    #historyScrollContainer {
+      scrollbar-width: thin;
+      scrollbar-color: #1e2d47 rgba(30, 45, 71, 0.3);
+    }
+
+    /* Row hover effect */
+    #histTableBody tr:hover td {
+      background: rgba(0, 229, 255, 0.05);
+    }
+
+    /* Animation for new rows */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .history-row-new {
+      animation: fadeInUp 0.3s ease-out;
+    }
+
+    /* Mobile menu animation keyframes */
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #mobileMenu.show {
+      display: block;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    /* Hamburger animation when menu is open */
+    #menuToggle.active span:first-child {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    #menuToggle.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    #menuToggle.active span:last-child {
+      transform: rotate(-45deg) translate(5px, -5px);
+    }
+  </style>
+</head>
+
+<body class="bg-[#04070f] text-[#e8edf5] font-['Syne',sans-serif] min-h-screen overflow-x-hidden">
+
+  <!-- Navigation with Responsive Mobile Menu -->
+  <nav class="sticky top-0 z-[100] bg-[#04070f]/85 backdrop-blur-md border-b border-[#1e2d47]">
+    <div class="flex items-center justify-between px-4 sm:px-6 md:px-10 h-16">
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2.5 font-extrabold text-xl tracking-tight no-underline text-[#e8edf5]">
+        <div class="w-2.5 h-2.5 bg-[#00e5ff] rounded-full shadow-[0_0_12px_#00e5ff] animate-pulse-dot"></div>
+        RTSLR
+      </a>
+
+      <!-- Desktop Navigation Links (hidden on mobile) -->
+      <div class="hidden md:flex gap-0.5">
+        <a href="/"
+          class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Index</a>
+        <a href="/inference"
+          class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Inference</a>
+        <a href="/session-analytics"
+          class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#00e5ff] bg-[#00e5ff]/10">Session
+          Analytics</a>
+        <a href="/dataset-analytics"
+          class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Dataset
+          Analytics</a>
+      </div>
+
+      <!-- Refresh Button + Mobile Menu Toggle -->
+      <div class="flex items-center gap-3">
+        <button onclick="loadAnalytics()"
+          class="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-[0.7rem] sm:text-[0.75rem] font-bold tracking-[0.04em] uppercase border border-[#1e2d47] text-[#5a6a82] bg-transparent hover:border-[#00e5ff] hover:text-[#00e5ff] transition-all cursor-pointer font-['Syne',sans-serif]">
+          ↻ Refresh
+        </button>
+
+        <!-- Mobile Menu Hamburger Button -->
+        <button id="menuToggle"
+          class="md:hidden flex flex-col items-center justify-center w-8 h-8 rounded-md border border-[#1e2d47] bg-transparent hover:border-[#00e5ff] transition-all cursor-pointer">
+          <span class="block w-4 h-0.5 bg-[#5a6a82] rounded-full transition-all duration-300"></span>
+          <span class="block w-4 h-0.5 bg-[#5a6a82] rounded-full my-1 transition-all duration-300"></span>
+          <span class="block w-4 h-0.5 bg-[#5a6a82] rounded-full transition-all duration-300"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Dropdown (hidden by default) -->
+    <div id="mobileMenu"
+      class="md:hidden hidden bg-[#04070f]/95 backdrop-blur-md border-t border-[#1e2d47] overflow-hidden transition-all duration-300">
+      <div class="flex flex-col py-3 px-4 space-y-1">
+        <a href="/"
+          class="px-4 py-2.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121] active:bg-[#0b1121]">Index</a>
+        <a href="/inference"
+          class="px-4 py-2.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121] active:bg-[#0b1121]">Inference</a>
+        <a href="/session-analytics"
+          class="px-4 py-2.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#00e5ff] bg-[#00e5ff]/10 transition-all hover:bg-[#00e5ff]/20">Session
+          Analytics</a>
+        <a href="/dataset-analytics"
+          class="px-4 py-2.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121] active:bg-[#0b1121]">Dataset
+          Analytics</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="pt-12 pb-6 px-10 max-w-[1400px] mx-auto">
+    <div
+      class="inline-flex items-center gap-2 text-[0.7rem] tracking-[0.15em] font-bold uppercase font-['JetBrains_Mono',monospace] text-[#ff8c42] mb-4">
+      <span class="w-6 h-px bg-[#ff8c42]"></span>
+      Accuracy & Performance Analysis
+    </div>
+    <h1
+      class="text-[clamp(1.8rem,3.5vw,3rem)] font-extrabold leading-[1.05] tracking-[-0.04em] bg-gradient-to-r from-white via-white to-[#ff8c42] bg-clip-text text-transparent mb-2">
+      Session Analytics
+    </h1>
+  </div>
+
+  <!-- Main Content -->
+  <div class="px-10 pb-12 max-w-[1400px] mx-auto">
+
+    <!-- KPI Row -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="bg-[#101828] border border-[#1e2d47] rounded-2xl p-5 relative overflow-hidden"
+        style="border-top:2px solid #00e5ff">
+        <div id="kpiTotal" class="text-4xl font-extrabold tracking-[-0.05em] text-[#00e5ff] leading-tight mb-1">—</div>
+        <div
+          class="text-[0.7rem] text-[#5a6a82] font-semibold uppercase tracking-[0.08em] font-['JetBrains_Mono',monospace]">
+          Total Predictions</div>
+        <div class="text-[0.7rem] text-[#5a6a82] mt-1 font-['JetBrains_Mono',monospace]">This session</div>
+      </div>
+      <div class="bg-[#101828] border border-[#1e2d47] rounded-2xl p-5 relative overflow-hidden"
+        style="border-top:2px solid #00ffa3">
+        <div id="kpiAvg" class="text-4xl font-extrabold tracking-[-0.05em] text-[#00ffa3] leading-tight mb-1">—</div>
+        <div
+          class="text-[0.7rem] text-[#5a6a82] font-semibold uppercase tracking-[0.08em] font-['JetBrains_Mono',monospace]">
+          Avg Confidence</div>
+        <div class="text-[0.7rem] text-[#5a6a82] mt-1 font-['JetBrains_Mono',monospace]">Across recognized signs</div>
+      </div>
+      <div class="bg-[#101828] border border-[#1e2d47] rounded-2xl p-5 relative overflow-hidden"
+        style="border-top:2px solid #ff8c42">
+        <div id="kpiUnique" class="text-4xl font-extrabold tracking-[-0.05em] text-[#ff8c42] leading-tight mb-1">—</div>
+        <div
+          class="text-[0.7rem] text-[#5a6a82] font-semibold uppercase tracking-[0.08em] font-['JetBrains_Mono',monospace]">
+          Unique Gestures</div>
+        <div class="text-[0.7rem] text-[#5a6a82] mt-1 font-['JetBrains_Mono',monospace]">of 49 classes</div>
+      </div>
+      <div class="bg-[#101828] border border-[#1e2d47] rounded-2xl p-5 relative overflow-hidden"
+        style="border-top:2px solid #7c3aed">
+        <div id="kpiTop" class="text-xl font-extrabold tracking-[-0.04em] text-[#e8edf5] leading-tight mb-1 truncate">—
+        </div>
+        <div
+          class="text-[0.7rem] text-[#5a6a82] font-semibold uppercase tracking-[0.08em] font-['JetBrains_Mono',monospace]">
+          Most Detected</div>
+        <div class="text-[0.7rem] text-[#5a6a82] mt-1 font-['JetBrains_Mono',monospace]">Dominant gesture</div>
+      </div>
+    </div>
+
+    <!-- Top Gestures + Accuracy Gauge Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 mb-5">
+
+      <!-- Top Gestures Card -->
+      <div class="bg-[#101828] border border-[#1e2d47] rounded-2xl overflow-hidden">
+        <div
+          class="flex items-center justify-between px-5 py-3.5 border-b border-[#1e2d47] text-[0.75rem] font-bold uppercase tracking-[0.08em] text-[#5a6a82] font-['JetBrains_Mono',monospace]">
+          Top Gestures by Frequency
+          <span id="topGestureCount" class="text-[#00e5ff] text-[0.65rem]"></span>
+        </div>
+        <div class="p-5" id="topGesturesBody">
+          <div class="text-center py-8 text-[#5a6a82] text-sm font-['JetBrains_Mono',monospace]">No data yet — start
+            signing!</div>
+        </div>
+      </div>
+
+      <!-- Accuracy Gauge Card -->
+      <div class="bg-[#101828] border border-[#1e2d47] rounded-2xl overflow-hidden">
+        <div
+          class="px-5 py-3.5 border-b border-[#1e2d47] text-[0.75rem] font-bold uppercase tracking-[0.08em] text-[#5a6a82] font-['JetBrains_Mono',monospace]">
+          Accuracy Overview</div>
+        <div class="p-5 flex flex-col items-center justify-center">
+          <div id="gaugeNum" class="text-5xl font-extrabold tracking-[-0.06em] text-[#00ffa3] leading-tight">—</div>
+          <div class="text-[0.7rem] text-[#5a6a82] font-['JetBrains_Mono',monospace] uppercase tracking-[0.08em] mt-1">
+            Avg Confidence</div>
+          <div id="gaugeSub" class="text-[0.75rem] text-[#5a6a82] mt-2 font-['JetBrains_Mono',monospace] text-center">
+            Sign into the camera to begin</div>
+          <canvas id="gaugeChart" style="max-width:160px; margin-top:1rem; max-height:100px;"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Distribution Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+      <div class="bg-[#101828] border border-[#1e2d47] rounded-2xl overflow-hidden">
+        <div
+          class="px-5 py-3.5 border-b border-[#1e2d47] text-[0.75rem] font-bold uppercase tracking-[0.08em] text-[#5a6a82] font-['JetBrains_Mono',monospace]">
+          Gesture Distribution (Bar)</div>
+        <div class="p-5">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+      <div class="bg-[#101828] border border-[#1e2d47] rounded-2xl overflow-hidden">
+        <div
+          class="px-5 py-3.5 border-b border-[#1e2d47] text-[0.75rem] font-bold uppercase tracking-[0.08em] text-[#5a6a82] font-['JetBrains_Mono',monospace]">
+          Gesture Distribution (Doughnut)</div>
+        <div class="p-5 flex justify-center">
+          <canvas id="donutChart" style="max-width:240px; max-height:240px;"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confidence Timeline -->
+    <div class="bg-[#101828] border border-[#1e2d47] rounded-2xl overflow-hidden mb-5">
+      <div
+        class="px-5 py-3.5 border-b border-[#1e2d47] text-[0.75rem] font-bold uppercase tracking-[0.08em] text-[#5a6a82] font-['JetBrains_Mono',monospace]">
+        Confidence Timeline</div>
+      <div class="p-5">
+        <canvas id="lineChart" style="max-height:200px;"></canvas>
+      </div>
+    </div>
+
+    <!-- Recognition History Table with Infinite Scrolling -->
+    <div class="bg-[#101828] border border-[#1e2d47] rounded-2xl overflow-hidden mb-5">
+      <div
+        class="flex items-center justify-between px-5 py-3.5 border-b border-[#1e2d47] text-[0.75rem] font-bold uppercase tracking-[0.08em] text-[#5a6a82] font-['JetBrains_Mono',monospace]">
+        Recognition History
+        <div class="flex items-center gap-3">
+          <span id="histTableCount" class="text-[#00e5ff] text-[0.65rem]"></span>
+          <button id="clearHistoryBtn"
+            class="text-[0.6rem] px-2 py-1 rounded border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all hidden sm:block">Clear</button>
+        </div>
+      </div>
+
+      <!-- Scrollable Container with Infinite Scroll -->
+      <div id="historyScrollContainer" class="overflow-y-auto"
+        style="max-height: 400px; -webkit-overflow-scrolling: touch;">
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse min-w-[500px]">
+            <thead class="sticky top-0 bg-[#101828] z-10">
+              <tr class="border-b border-[#1e2d47]">
+                <th
+                  class="text-[0.65rem] font-bold uppercase tracking-[0.1em] text-[#5a6a82] font-['JetBrains_Mono',monospace] p-3 text-left w-[50px]">
+                  #</th>
+                <th
+                  class="text-[0.65rem] font-bold uppercase tracking-[0.1em] text-[#5a6a82] font-['JetBrains_Mono',monospace] p-3 text-left">
+                  Gesture</th>
+                <th
+                  class="text-[0.65rem] font-bold uppercase tracking-[0.1em] text-[#5a6a82] font-['JetBrains_Mono',monospace] p-3 text-left w-[90px]">
+                  Confidence</th>
+                <th
+                  class="text-[0.65rem] font-bold uppercase tracking-[0.1em] text-[#5a6a82] font-['JetBrains_Mono',monospace] p-3 text-left w-[70px]">
+                  Rating</th>
+                <th
+                  class="text-[0.65rem] font-bold uppercase tracking-[0.1em] text-[#5a6a82] font-['JetBrains_Mono',monospace] p-3 text-left w-[100px]">
+                  Time</th>
+              </tr>
+            </thead>
+            <tbody id="histTableBody">
+              <tr>
+                <td colspan="5" class="text-center py-8 text-[#5a6a82] text-sm font-['JetBrains_Mono',monospace]">No
+                  history yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Loading indicator (hidden by default) -->
+        <div id="historyLoadingIndicator" class="text-center py-4 hidden">
+          <div class="inline-flex items-center gap-2 text-[#00e5ff] text-xs font-['JetBrains_Mono',monospace]">
+            <div class="w-2 h-2 bg-[#00e5ff] rounded-full animate-pulse-dot"></div>
+            Loading more...
+          </div>
+        </div>
+
+        <!-- End of records indicator -->
+        <div id="historyEndIndicator" class="text-center py-4 hidden">
+          <p class="text-[#5a6a82] text-xs font-['JetBrains_Mono',monospace]">✓ End of history</p>
+        </div>
+      </div>
+
+      <!-- Mobile clear button (visible only on small screens) -->
+      <div class="sm:hidden p-3 border-t border-[#1e2d47]">
+        <button id="clearHistoryBtnMobile"
+          class="w-full text-[0.7rem] py-2 rounded border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-all">Clear
+          History</button>
+      </div>
+    </div>
+
+    <!-- All Gestures Coverage -->
+    <div class="bg-[#101828] border border-[#1e2d47] rounded-2xl overflow-hidden">
+      <div
+        class="flex items-center justify-between px-5 py-3.5 border-b border-[#1e2d47] text-[0.75rem] font-bold uppercase tracking-[0.08em] text-[#5a6a82] font-['JetBrains_Mono',monospace]">
+        All Gesture Classes Coverage
+        <span id="coveragePct" class="text-[#00ffa3] text-[0.65rem]"></span>
+      </div>
+      <div class="p-5">
+        <div id="gestureGrid"
+          class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-2"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // 49 ISL gesture classes
+    const CLASSES = [
+      "hello", "bye", "again", "you", "deaf", "hearing", "teacher",
+      "thank_you", "welcome", "sorry", "correct", "wrong", "good",
+      "morning", "understand", "yes", "no", "exam", "home", "work",
+      "can", "will", "do", "your", "write", "this", "it", "difficult",
+      "read", "yesterday", "my", "name", "who", "what", "class",
+      "leader", "i_or_me", "i_dont_understand", "tomorrow", "how",
+      "sit_down", "stand_up", "come", "study", "look", "here",
+      "now", "help", "quiet"
+    ];
+
+    let barChart, donutChart, lineChart, gaugeChart;
+
+    // Helper: generate colors for charts
+    function generateColors(n) {
+      const base = ['#00e5ff', '#7c3aed', '#00ffa3', '#ff8c42', '#ff4444', '#f59e0b', '#3b82f6', '#ec4899', '#14b8a6', '#a855f7'];
+      return Array.from({ length: n }, (_, i) => base[i % base.length]);
+    }
+
+    // Initialize all charts
+    function initCharts() {
+      Chart.defaults.color = '#5a6a82';
+      Chart.defaults.borderColor = '#1e2d47';
+      Chart.defaults.font.family = "'JetBrains Mono', monospace";
+
+      const barCtx = document.getElementById('barChart').getContext('2d');
+      barChart = new Chart(barCtx, {
+        type: 'bar',
+        data: { labels: [], datasets: [{ data: [], backgroundColor: 'rgba(0,229,255,0.15)', borderColor: 'rgba(0,229,255,0.8)', borderWidth: 1.5, borderRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } }, y: { ticks: { font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' }, beginAtZero: true } } }
+      });
+
+      const donutCtx = document.getElementById('donutChart').getContext('2d');
+      donutChart = new Chart(donutCtx, {
+        type: 'doughnut',
+        data: { labels: [], datasets: [{ data: [], backgroundColor: generateColors(49), borderWidth: 0, hoverOffset: 6 }] },
+        options: { responsive: true, maintainAspectRatio: true, cutout: '72%', plugins: { legend: { display: false } } }
+      });
+
+      const lineCtx = document.getElementById('lineChart').getContext('2d');
+      lineChart = new Chart(lineCtx, {
+        type: 'line',
+        data: { labels: [], datasets: [{ label: 'Confidence %', data: [], borderColor: 'rgba(0,229,255,0.8)', backgroundColor: 'rgba(0,229,255,0.05)', fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: '#00e5ff' }] },
+        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } }, y: { ticks: { font: { size: 9 }, callback: v => v + '%' }, grid: { color: 'rgba(255,255,255,0.04)' }, min: 0, max: 100 } } }
+      });
+
+      const gaugeCtx = document.getElementById('gaugeChart').getContext('2d');
+      gaugeChart = new Chart(gaugeCtx, {
+        type: 'doughnut',
+        data: { datasets: [{ data: [0, 100], backgroundColor: ['#00ffa3', '#1e2d47'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: true, cutout: '80%', plugins: { legend: { display: false } }, rotation: -90, circumference: 180 }
+      });
+    }
+
+    // Fetch and render analytics data
+    async function loadAnalytics() {
+      try {
+        const res = await fetch('/api/analytics');
+        const d = await res.json();
+        renderAnalytics(d);
+      } catch (e) {
+        console.error('Analytics fetch error:', e);
+        // Demo fallback data for visual testing
+        renderAnalytics({
+          total_predictions: 0,
+          avg_confidence: 0,
+          unique_gestures: 0,
+          top_gestures: [],
+          history: [],
+          all_counts: {}
+        });
+      }
+    }
+
+    function renderAnalytics(d) {
+      // Update KPIs
+      document.getElementById('kpiTotal').textContent = d.total_predictions || 0;
+      document.getElementById('kpiAvg').textContent = (d.avg_confidence || 0).toFixed(1) + '%';
+      document.getElementById('kpiUnique').textContent = d.unique_gestures || 0;
+      const topG = d.top_gestures && d.top_gestures[0];
+      document.getElementById('kpiTop').textContent = topG ? topG.gesture.replace(/_/g, ' ').toUpperCase() : '—';
+
+      // Gauge chart
+      const avgConf = d.avg_confidence || 0;
+      document.getElementById('gaugeNum').textContent = avgConf.toFixed(1) + '%';
+      const histLen = (d.history || []).length;
+      document.getElementById('gaugeSub').textContent = histLen > 0 ? `Based on ${histLen} recognized signs` : 'Sign into the camera to begin';
+      gaugeChart.data.datasets[0].data = [avgConf, 100 - avgConf];
+      gaugeChart.update();
+
+      // Top gestures list
+      const topBody = document.getElementById('topGesturesBody');
+      const topGestures = d.top_gestures || [];
+      document.getElementById('topGestureCount').textContent = topGestures.length + ' shown';
+      if (topGestures.length > 0) {
+        const maxCount = topGestures[0].count;
+        topBody.innerHTML = topGestures.map(g => `
+      <div class="mb-3">
+        <div class="flex justify-between items-baseline mb-1.5">
+          <div class="text-[0.8rem] font-bold uppercase tracking-[0.02em] text-[#e8edf5]">${g.gesture.replace(/_/g, ' ')}</div>
+          <div class="text-[0.7rem] text-[#5a6a82] font-['JetBrains_Mono',monospace]">${g.count}× · ${g.pct}%</div>
+        </div>
+        <div class="h-1.5 bg-[#1e2d47] rounded-full overflow-hidden">
+          <div class="h-full rounded-full bg-gradient-to-r from-[#7c3aed] to-[#00e5ff] transition-all duration-300" style="width: ${(g.count / maxCount * 100).toFixed(1)}%"></div>
+        </div>
+      </div>
+    `).join('');
+      } else {
+        topBody.innerHTML = '<div class="text-center py-8 text-[#5a6a82] text-sm font-["JetBrains_Mono",monospace]">No data yet — start signing!</div>';
+      }
+
+      // Bar and Donut charts
+      if (topGestures.length > 0) {
+        const labels = topGestures.map(g => g.gesture.replace(/_/g, ' '));
+        const vals = topGestures.map(g => g.count);
+        barChart.data.labels = labels;
+        barChart.data.datasets[0].data = vals;
+        barChart.update();
+
+        donutChart.data.labels = labels;
+        donutChart.data.datasets[0].data = vals;
+        donutChart.update();
+      } else {
+        barChart.data.labels = [];
+        barChart.data.datasets[0].data = [];
+        barChart.update();
+        donutChart.data.labels = [];
+        donutChart.data.datasets[0].data = [];
+        donutChart.update();
+      }
+
+      // Line chart - confidence timeline
+      const history = d.history || [];
+      const reversed = [...history].reverse();
+      lineChart.data.labels = reversed.map(h => h.timestamp);
+      lineChart.data.datasets[0].data = reversed.map(h => h.confidence);
+      lineChart.update();
+
+      // History table
+      document.getElementById('histTableCount').textContent = history.length + ' records';
+      const tbody = document.getElementById('histTableBody');
+      if (history.length > 0) {
+        tbody.innerHTML = history.map((h, i) => {
+          const conf = h.confidence;
+          let badgeCls = '', rating = '';
+          if (conf >= 85) { badgeCls = 'bg-[#00ffa3]/10 text-[#00ffa3] border border-[#00ffa3]/20'; rating = 'HIGH'; }
+          else if (conf >= 60) { badgeCls = 'bg-[#00e5ff]/10 text-[#00e5ff] border border-[#00e5ff]/20'; rating = 'MED'; }
+          else { badgeCls = 'bg-[#ff8c42]/10 text-[#ff8c42] border border-[#ff8c42]/20'; rating = 'LOW'; }
+          return `
+        <tr class="border-b border-white/5 hover:bg-white/5">
+          <td class="p-3 text-[#5a6a82] font-['JetBrains_Mono',monospace] text-[0.75rem]">${i + 1}</td>
+          <td class="p-3 font-bold uppercase tracking-[0.04em] text-[0.8rem]">${h.gesture.replace(/_/g, ' ')}</td>
+          <td class="p-3 font-['JetBrains_Mono',monospace] text-[#00ffa3] text-[0.8rem]">${conf}%</td>
+          <td class="p-3"><span class="inline-block px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-[0.05em] font-['JetBrains_Mono',monospace] ${badgeCls}">${rating}</span></td>
+          <td class="p-3 font-['JetBrains_Mono',monospace] text-[0.7rem] text-[#5a6a82]">${h.timestamp}</td>
+        </tr>
+      `;
+        }).join('');
+      } else {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-[#5a6a82] text-sm font-["JetBrains_Mono",monospace]">No history yet.</td></tr>';
+      }
+
+      // Infinite Scroll Configuration
+      let allHistoryData = []; // Store all history records
+      let currentDisplayCount = 20; // Number of records to display initially
+      let isLoadingMore = false;
+      let hasMoreData = true;
+      let scrollContainer = null;
+      let lastScrollTop = 0;
+
+      // Initialize infinite scroll
+      function initInfiniteScroll() {
+        scrollContainer = document.getElementById('historyScrollContainer');
+        if (!scrollContainer) return;
+
+        // Load initial batch
+        loadMoreHistory();
+
+        // Add scroll event listener
+        scrollContainer.addEventListener('scroll', function () {
+          const scrollTop = this.scrollTop;
+          const scrollHeight = this.scrollHeight;
+          const clientHeight = this.clientHeight;
+
+          // Detect if scrolled to bottom (with 50px threshold)
+          if (scrollTop + clientHeight >= scrollHeight - 50) {
+            if (!isLoadingMore && hasMoreData) {
+              loadMoreHistory();
+            }
+          }
+        });
+      }
+
+      // Load more history records
+      function loadMoreHistory() {
+        if (isLoadingMore) return;
+
+        isLoadingMore = true;
+        const loadingIndicator = document.getElementById('historyLoadingIndicator');
+        if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+
+        // Simulate async loading (replace with actual data fetch)
+        setTimeout(() => {
+          const startIndex = currentDisplayCount - 20;
+          const endIndex = Math.min(currentDisplayCount, allHistoryData.length);
+
+          if (endIndex > startIndex) {
+            const newRecords = allHistoryData.slice(startIndex, endIndex);
+            appendHistoryRows(newRecords, startIndex);
+          }
+
+          // Check if we've loaded all data
+          if (currentDisplayCount >= allHistoryData.length) {
+            hasMoreData = false;
+            const endIndicator = document.getElementById('historyEndIndicator');
+            if (endIndicator) endIndicator.classList.remove('hidden');
+          }
+
+          if (loadingIndicator) loadingIndicator.classList.add('hidden');
+          isLoadingMore = false;
+        }, 300);
+      }
+
+      // Append new rows to the table
+      function appendHistoryRows(records, startIndex) {
+        const tbody = document.getElementById('histTableBody');
+        if (!tbody) return;
+
+        // Remove "no history" message if present
+        if (tbody.children.length === 1 && tbody.children[0].innerHTML.includes('No history yet')) {
+          tbody.innerHTML = '';
+        }
+
+        records.forEach((h, idx) => {
+          const globalIndex = startIndex + idx + 1;
+          const conf = h.confidence;
+          let badgeCls = '', rating = '';
+
+          if (conf >= 85) {
+            badgeCls = 'bg-[#00ffa3]/10 text-[#00ffa3] border border-[#00ffa3]/20';
+            rating = 'HIGH';
+          } else if (conf >= 60) {
+            badgeCls = 'bg-[#00e5ff]/10 text-[#00e5ff] border border-[#00e5ff]/20';
+            rating = 'MED';
+          } else {
+            badgeCls = 'bg-[#ff8c42]/10 text-[#ff8c42] border border-[#ff8c42]/20';
+            rating = 'LOW';
+          }
+
+          const row = document.createElement('tr');
+          row.className = 'border-b border-white/5 history-row-new';
+          row.innerHTML = `
+      <td class="p-3 text-[#5a6a82] font-['JetBrains_Mono',monospace] text-[0.75rem]">${globalIndex}</td>
+      <td class="p-3 font-bold uppercase tracking-[0.04em] text-[0.8rem] break-word">${h.gesture.replace(/_/g, ' ')}</td>
+      <td class="p-3 font-['JetBrains_Mono',monospace] text-[#00ffa3] text-[0.8rem]">${conf}%</td>
+      <td class="p-3"><span class="inline-block px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-[0.05em] font-['JetBrains_Mono',monospace] ${badgeCls}">${rating}</span></td>
+      <td class="p-3 font-['JetBrains_Mono',monospace] text-[0.7rem] text-[#5a6a82]">${h.timestamp}</td>
+    `;
+          tbody.appendChild(row);
+        });
+
+        // Remove animation class after animation ends
+        setTimeout(() => {
+          document.querySelectorAll('.history-row-new').forEach(row => {
+            row.classList.remove('history-row-new');
+          });
+        }, 300);
+      }
+
+      // Update the entire history display (called from your existing renderAnalytics function)
+      function updateHistoryWithInfiniteScroll(historyData) {
+        allHistoryData = [...historyData].reverse(); // Store newest first, but we'll display in reverse order
+
+        // Reset pagination
+        currentDisplayCount = 20;
+        hasMoreData = true;
+        isLoadingMore = false;
+
+        // Clear the table body
+        const tbody = document.getElementById('histTableBody');
+        if (tbody) tbody.innerHTML = '';
+
+        // Reset indicators
+        const endIndicator = document.getElementById('historyEndIndicator');
+        if (endIndicator) endIndicator.classList.add('hidden');
+
+        // Show loading indicator briefly then load
+        const loadingIndicator = document.getElementById('historyLoadingIndicator');
+        if (loadingIndicator) {
+          loadingIndicator.classList.remove('hidden');
+          setTimeout(() => {
+            loadMoreHistory();
+          }, 100);
+        } else {
+          loadMoreHistory();
+        }
+
+        // Update count display
+        document.getElementById('histTableCount').textContent = historyData.length + ' records';
+      }
+
+      // Clear history function
+      function clearHistory() {
+        if (confirm('Are you sure you want to clear all recognition history?')) {
+          allHistoryData = [];
+          const tbody = document.getElementById('histTableBody');
+          if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-[#5a6a82] text-sm font-[\'JetBrains_Mono\',monospace]">No history yet.</td></tr>';
+          }
+          document.getElementById('histTableCount').textContent = '0 records';
+          hasMoreData = false;
+
+          // Also clear on backend if needed
+          fetch('/api/clear_history', { method: 'POST' }).catch(() => { });
+        }
+      }
+
+      // Modify your existing renderAnalytics function to use the new infinite scroll
+      // Replace the history table rendering part with:
+      /*
+      // In your renderAnalytics function, replace the history table section with:
+      if (d.history && d.history.length > 0) {
+        updateHistoryWithInfiniteScroll(d.history);
+      } else {
+        allHistoryData = [];
+        const tbody = document.getElementById('histTableBody');
+        if (tbody) {
+          tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-[#5a6a82] text-sm font-[\'JetBrains_Mono\',monospace]">No history yet.</td></tr>';
+        }
+        document.getElementById('histTableCount').textContent = '0 records';
+      }
+      */
+
+      // Initialize infinite scroll when DOM is ready
+      document.addEventListener('DOMContentLoaded', function () {
+        initInfiniteScroll();
+
+        // Add clear history button listeners
+        const clearBtn = document.getElementById('clearHistoryBtn');
+        const clearBtnMobile = document.getElementById('clearHistoryBtnMobile');
+
+        if (clearBtn) {
+          clearBtn.addEventListener('click', clearHistory);
+        }
+        if (clearBtnMobile) {
+          clearBtnMobile.addEventListener('click', clearHistory);
+        }
+      });
+
+      // Gesture coverage grid
+      const allCounts = d.all_counts || {};
+      const detectedCount = Object.keys(allCounts).length;
+      document.getElementById('coveragePct').textContent = `${detectedCount}/${CLASSES.length} detected (${((detectedCount / CLASSES.length) * 100).toFixed(0)}%)`;
+      document.getElementById('gestureGrid').innerHTML = CLASSES.map(g => {
+        const cnt = allCounts[g] || 0;
+        const activeClass = cnt > 0 ? 'border-[#00e5ff]/30 bg-[#00e5ff]/5' : 'border-[#1e2d47]';
+        return `
+      <div class="bg-[#0b1121] border ${activeClass} rounded-lg p-2 transition-all">
+        <div class="text-[0.7rem] font-bold uppercase tracking-[0.03em] text-[#e8edf5] truncate">${g.replace(/_/g, ' ')}</div>
+        <div class="text-[0.65rem] text-[#5a6a82] font-['JetBrains_Mono',monospace]">${cnt > 0 ? cnt + ' times' : 'not yet'}</div>
+      </div>
+    `;
+      }).join('');
+    }
+
+    // Initialize and start polling
+    initCharts();
+    loadAnalytics();
+    setInterval(loadAnalytics, 2000);
+
+
+    // Mobile menu toggle functionality
+    (function () {
+      const menuToggle = document.getElementById('menuToggle');
+      const mobileMenu = document.getElementById('mobileMenu');
+
+      if (menuToggle && mobileMenu) {
+        menuToggle.addEventListener('click', function (e) {
+          e.stopPropagation();
+          mobileMenu.classList.toggle('show');
+          menuToggle.classList.toggle('active');
+        });
+
+        // Close menu when clicking outside (optional but user-friendly)
+        document.addEventListener('click', function (event) {
+          if (!menuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+            if (mobileMenu.classList.contains('show')) {
+              mobileMenu.classList.remove('show');
+              menuToggle.classList.remove('active');
+            }
+          }
+        });
+
+        // Close menu when a link is clicked (smooth navigation)
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+          link.addEventListener('click', function () {
+            mobileMenu.classList.remove('show');
+            menuToggle.classList.remove('active');
+          });
+        });
+
+        // Handle window resize: if screen becomes desktop, ensure menu is closed
+        window.addEventListener('resize', function () {
+          if (window.innerWidth >= 768) { // md breakpoint
+            if (mobileMenu.classList.contains('show')) {
+              mobileMenu.classList.remove('show');
+              menuToggle.classList.remove('active');
+            }
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+
+</html>
