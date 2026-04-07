@@ -3,3 +3,4 @@ opencv-python==4.8.1.78
 mediapipe==0.10.33
 numpy
 torch==2.11.0
+gunicorn
