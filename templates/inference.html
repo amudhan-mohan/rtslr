@@ -4,10 +4,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Instance - RTSLR</title>
+  <title>Dynamic Inference - RTSLR</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
-    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Anta:wght@400;700;800&family=Ubuntu:wght@300;400;500;700&family=JetBrains+Mono:wght@300;400;500&display=swap"
     rel="stylesheet" />
 
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -175,13 +175,14 @@
   </style>
 </head>
 
-<body class="bg-[#04070f] text-[#e8edf5] font-['Syne',sans-serif] min-h-screen overflow-x-hidden">
+<body class="bg-[#04070f] text-[#e8edf5] font-['Ubuntu',sans-serif] min-h-screen overflow-x-hidden">
 
   <!-- Navigation with Responsive Mobile Menu -->
   <nav class="sticky top-0 z-[100] bg-[#04070f]/85 backdrop-blur-md border-b border-[#1e2d47]">
     <div class="flex items-center justify-between px-4 sm:px-6 md:px-10 h-16">
       <!-- Logo -->
-      <a href="/" class="flex items-center gap-2.5 font-extrabold text-xl tracking-tight no-underline text-[#e8edf5]">
+      <a href="/"
+        class="flex items-center gap-2.5 font-extrabold text-xl tracking-tight no-underline text-[#e8edf5] font-['Anta',sans-serif]">
         <div class="w-2.5 h-2.5 bg-[#00e5ff] rounded-full shadow-[0_0_12px_#00e5ff] animate-pulse-dot"></div>
         RTSLR
       </a>
@@ -190,12 +191,14 @@
       <div class="hidden md:flex gap-0.5">
         <a href="/"
           class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Index</a>
-        <a href="/inference"
+        <a href="/change-mode"
+          class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Change Mode</a>
+        <a href="/dynamic/inference"
           class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#00e5ff] bg-[#00e5ff]/10">Inference</a>
-        <a href="/session-analytics"
+        <a href="/dynamic/session-analytics"
           class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Sesssion
           Analytics</a>
-        <a href="/dataset-analytics"
+        <a href="/dynamic/dataset-analytics"
           class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Dataset
           Analytics</a>
       </div>
@@ -228,15 +231,19 @@
           class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121] active:bg-[#0b1121] flex items-center gap-3">
           Index
         </a>
-        <a href="/inference"
+        <a href="/change-mode"
+          class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121] active:bg-[#0b1121] flex items-center gap-3">
+          Change Mode
+        </a>
+        <a href="/dynamic/inference"
           class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#00e5ff] bg-[#00e5ff]/10 transition-all hover:bg-[#00e5ff]/20 flex items-center gap-3">
           Inference
         </a>
-        <a href="/session-analytics"
+        <a href="/dynamic/session-analytics"
           class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121] active:bg-[#0b1121] flex items-center gap-3">
           Analytics
         </a>
-        <a href="/dataset-analytics"
+        <a href="/dynamic/dataset-analytics"
           class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121] active:bg-[#0b1121] flex items-center gap-3">
           Dataset Analytics
         </a>
@@ -252,8 +259,8 @@
       Indian Sign Language · ISL Recognition
     </div>
     <h1
-      class="text-[clamp(2rem,4vw,3.5rem)] font-extrabold leading-[1.05] tracking-[-0.04em] bg-gradient-to-r from-white via-white to-[#00e5ff] bg-clip-text text-transparent mb-3">
-      Real-Time Sign<br>Detection
+      class="text-[clamp(2rem,4vw,3.5rem)] font-extrabold leading-[1.05] tracking-[-0.04em] bg-gradient-to-r from-white via-white to-[#00e5ff] bg-clip-text text-transparent mb-3 font-['Anta',sans-serif]">
+      Dynamic Inference
     </h1>
   </div>
 
@@ -266,7 +273,7 @@
       <div class="flex items-center justify-between p-4 border-b border-[#1e2d47] bg-white/5">
         <div class="flex items-center gap-2.5">
           <div>
-            <div class="text-sm font-bold tracking-wide">Live Camera Feed</div>
+            <div class="text-sm font-bold tracking-wide font-['Anta',sans-serif]">Live Camera Feed</div>
             <div class="text-[0.7rem] text-[#5a6a82] font-['JetBrains_Mono',monospace]">Pose + Hand landmark detection
             </div>
           </div>
@@ -286,7 +293,7 @@
       </div>
 
       <div class="relative aspect-[4/3] bg-black">
-        <img id="videoFeed" src="/video_feed" alt="Live Feed" class="w-full h-full object-cover block" />
+        <img id="videoFeed" src="/dynamic/video_feed" alt="Live Feed" class="w-full h-full object-cover block" />
         <div class="corner tl"></div>
         <div class="corner tr"></div>
         <div class="corner bl"></div>
@@ -300,7 +307,7 @@
               class="text-[0.65rem] text-[#5a6a82] font-['JetBrains_Mono',monospace] tracking-[0.08em] uppercase mb-1">
               Detected Gesture</div>
             <div id="predGesture"
-              class="text-[1.6rem] font-extrabold tracking-[-0.03em] uppercase text-[#00e5ff] drop-shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-all duration-300">
+              class="text-[1.6rem] font-extrabold tracking-[-0.03em] uppercase text-[#00e5ff] drop-shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-all duration-300 font-['Anta',sans-serif]">
               —</div>
           </div>
           <div class="font-['JetBrains_Mono',monospace] text-right">
@@ -347,27 +354,31 @@
           <div class="grid grid-cols-2 gap-3.5">
             <div class="bg-[#0b1121] rounded-xl p-[0.875rem_1rem] border border-[#1e2d47]">
               <div id="statTotal"
-                class="text-[1.75rem] font-extrabold tracking-[-0.04em] text-[#00e5ff] leading-tight mb-0.5">0</div>
+                class="text-[1.75rem] font-extrabold tracking-[-0.04em] text-[#00e5ff] leading-tight mb-0.5 font-['Anta',sans-serif]">
+                0</div>
               <div
                 class="text-[0.7rem] text-[#5a6a82] font-semibold uppercase tracking-[0.06em] font-['JetBrains_Mono',monospace]">
                 Predictions</div>
             </div>
             <div class="bg-[#0b1121] rounded-xl p-[0.875rem_1rem] border border-[#1e2d47]">
               <div id="statUnique"
-                class="text-[1.75rem] font-extrabold tracking-[-0.04em] text-[#00e5ff] leading-tight mb-0.5">0</div>
+                class="text-[1.75rem] font-extrabold tracking-[-0.04em] text-[#00e5ff] leading-tight mb-0.5 font-['Anta',sans-serif]">
+                0</div>
               <div
                 class="text-[0.7rem] text-[#5a6a82] font-semibold uppercase tracking-[0.06em] font-['JetBrains_Mono',monospace]">
                 Unique Signs</div>
             </div>
             <div class="bg-[#0b1121] rounded-xl p-[0.875rem_1rem] border border-[#1e2d47]">
               <div id="statAvgConf"
-                class="text-[1.75rem] font-extrabold tracking-[-0.04em] text-[#00ffa3] leading-tight mb-0.5">0%</div>
+                class="text-[1.75rem] font-extrabold tracking-[-0.04em] text-[#00ffa3] leading-tight mb-0.5 font-['Anta',sans-serif]">
+                0%</div>
               <div
                 class="text-[0.7rem] text-[#5a6a82] font-semibold uppercase tracking-[0.06em] font-['JetBrains_Mono',monospace]">
                 Avg Accuracy</div>
             </div>
             <div class="bg-[#0b1121] rounded-xl p-[0.875rem_1rem] border border-[#1e2d47]">
-              <div id="statTopSign" class="text-sm font-bold text-[#e8edf5] pt-1 truncate">—</div>
+              <div id="statTopSign" class="text-sm font-bold text-[#e8edf5] pt-1 truncate font-['Anta',sans-serif]">—
+              </div>
               <div
                 class="text-[0.7rem] text-[#5a6a82] font-semibold uppercase tracking-[0.06em] font-['JetBrains_Mono',monospace]">
                 Most Used</div>
@@ -448,41 +459,157 @@
       cameraActive = active;
     }
 
-    async function toggleCamera() {
+    // Request camera permission from browser
+    async function requestCameraPermission() {
       try {
-        const newState = !cameraActive;
+        // Request permission without actually opening the stream
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: 'user'
+          },
+          audio: false
+        });
 
-        // If turning ON, show loading state first
-        if (newState) {
-          videoImg.style.opacity = '0.5';
-          toggleText.textContent = 'Starting...';
-        }
+        // Stop the stream immediately (we just needed permission)
+        stream.getTracks().forEach(track => track.stop());
 
-        const response = await fetch('/api/camera/control', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ camera_on: newState })
-        }).catch(() => ({ ok: false }));
-
-        setCameraState(newState);
-
-        if (newState) {
-          // Add timestamp to prevent caching
-          videoImg.src = '/video_feed?_t=' + Date.now();
-          videoImg.style.opacity = '1';
-
-          // Optional: Show a success toast/notification
-          showToast('Camera turned ON', 'success');
+        return { granted: true, message: 'Camera permission granted' };
+      } catch (error) {
+        if (error.name === 'NotAllowedError') {
+          return { granted: false, message: 'Camera permission denied by user' };
+        } else if (error.name === 'NotFoundError') {
+          return { granted: false, message: 'No camera device found' };
+        } else if (error.name === 'NotReadableError') {
+          return { granted: false, message: 'Camera is being used by another application' };
         } else {
-          // Optional: Show notification
-          showToast('Camera turned OFF', 'info');
+          return { granted: false, message: 'Camera access error: ' + error.message };
         }
-      } catch (e) {
-        console.error('Camera toggle error:', e);
-        setCameraState(!cameraActive);
-        showToast('Failed to toggle camera', 'error');
       }
     }
+
+    // Check if camera permission is already granted
+    async function checkCameraPermission() {
+      try {
+        const permissions = await navigator.permissions.query({ name: 'camera' });
+        return permissions.state; // 'granted', 'denied', or 'prompt'
+      } catch (error) {
+        return 'prompt'; // Fallback if permissions API not supported
+      }
+    }
+
+    async function toggleCamera() {
+      const newState = !cameraActive;
+
+      if (newState) {
+        // Turning camera ON - request permission first
+        videoImg.style.opacity = '0.5';
+        toggleText.textContent = 'Requesting...';
+        toggleIcon.textContent = '📷⏳';
+
+        // Check current permission status
+        const permissionStatus = await checkCameraPermission();
+
+        if (permissionStatus === 'denied') {
+          // Permission was previously denied
+          showToast('Camera permission denied. Please enable in browser settings.', 'error');
+          setCameraState(false);
+
+          // Show instructions to enable permission
+          showPermissionInstructions();
+          return;
+        }
+
+        // Request camera permission
+        const permission = await requestCameraPermission();
+
+        if (!permission.granted) {
+          showToast(permission.message, 'error');
+          setCameraState(false);
+          return;
+        }
+
+        // Permission granted - now call backend to start camera
+        try {
+          const response = await fetch('/dynamic/api/camera/control', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ camera_on: true })
+          });
+
+          if (response.ok) {
+            setCameraState(true);
+            videoImg.src = '/dynamic/video_feed?_t=' + Date.now();
+            videoImg.style.opacity = '1';
+            showToast('Camera activated successfully', 'success');
+          } else {
+            throw new Error('Backend failed to start camera');
+          }
+        } catch (error) {
+          console.error('Camera start error:', error);
+          showToast('Failed to start camera: ' + error.message, 'error');
+          setCameraState(false);
+        }
+      } else {
+        // Turning camera OFF
+        try {
+          await fetch('/dynamic/api/camera/control', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ camera_on: false })
+          });
+
+          setCameraState(false);
+          showToast('Camera turned off', 'info');
+        } catch (error) {
+          console.error('Camera stop error:', error);
+          setCameraState(!cameraActive); // Revert state
+          showToast('Failed to turn off camera', 'error');
+        }
+      }
+    }
+
+    function showPermissionInstructions() {
+      const instructions = `
+    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                background: #101828; border: 2px solid #00e5ff; border-radius: 16px; 
+                padding: 30px; z-index: 1000; max-width: 400px; text-align: center;
+                box-shadow: 0 0 50px rgba(0, 229, 255, 0.3);">
+      <div style="font-size: 48px; margin-bottom: 15px;">📷</div>
+      <h3 style="font-family: 'Anta', sans-serif; color: #00e5ff; margin-bottom: 15px; 
+                 font-size: 1.5rem;">Camera Access Required</h3>
+      <p style="color: #e8edf5; margin-bottom: 20px; line-height: 1.6;">
+        To enable camera access:<br><br>
+        <strong style="color: #00ffa3;">Chrome/Edge:</strong> Click the lock icon 🔒 in the address bar → 
+        Allow Camera<br><br>
+        <strong style="color: #00ffa3;">Firefox:</strong> Click the camera icon in address bar → 
+        Allow Camera<br><br>
+        Then refresh the page.
+      </p>
+      <button onclick="this.closest('div[style*=fixed]').remove()" 
+              style="background: #00e5ff; color: #04070f; border: none; padding: 12px 30px; 
+                     border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'Ubuntu', sans-serif;">
+        Got it
+      </button>
+    </div>
+    <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 999;" 
+         onclick="this.nextElementSibling.remove()"></div>
+  `;
+      document.body.insertAdjacentHTML('beforeend', instructions);
+    }
+
+    // Check camera permission on page load
+    window.addEventListener('load', async () => {
+      const status = await checkCameraPermission();
+      if (status === 'granted') {
+        console.log('Camera permission already granted');
+      } else if (status === 'denied') {
+        console.log('Camera permission previously denied');
+        // Optionally show a small indicator
+        showToast('Camera permission denied. Click to enable.', 'info');
+      }
+    });
 
     // Optional: Add a small toast notification system for better UX
     function showToast(message, type = 'info') {
@@ -551,7 +678,7 @@
     // Poll API for state updates
     setInterval(async () => {
       try {
-        const res = await fetch('/api/state');
+        const res = await fetch('/dynamic/api/state');
         const d = await res.json();
         updateUI(d);
       } catch (e) { }
@@ -593,7 +720,7 @@
     // Poll API for state updates
     setInterval(async () => {
       try {
-        const res = await fetch('/api/state');
+        const res = await fetch('/dynamic/api/state');
         const d = await res.json();
         updateUI(d);
       } catch (e) { }
@@ -646,7 +773,7 @@
         if (hist.length) {
           document.getElementById('historyFeed').innerHTML = hist.map(h => `
         <div class="flex items-center gap-3 py-2 border-b border-white/5 animate-slide-in">
-          <div class="flex-1 font-bold text-sm uppercase text-[#e8edf5]">${h.gesture.replace(/_/g, ' ')}</div>
+          <div class="flex-1 font-bold text-sm uppercase text-[#e8edf5] font-['Anta',sans-serif]">${h.gesture.replace(/_/g, ' ')}</div>
           <div class="font-['JetBrains_Mono',monospace] text-[0.7rem] text-[#00ffa3] font-medium">${h.confidence}%</div>
           <div class="font-['JetBrains_Mono',monospace] text-[0.65rem] text-[#5a6a82]">${h.timestamp}</div>
         </div>

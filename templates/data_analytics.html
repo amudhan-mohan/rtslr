@@ -4,16 +4,16 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dataset Analytics — RTSLR</title>
+    <title>Dynamic Dataset Analytics — RTSLR</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@300;400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Anta:wght@400;700;800&family=Ubuntu:wght@300;400;500;700&family=DM+Mono:wght@300;400;500&display=swap"
         rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
         body {
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Ubuntu', sans-serif;
         }
 
         .custom-scroll::-webkit-scrollbar {
@@ -107,8 +107,8 @@
         <div class="flex items-center justify-between px-4 sm:px-6 md:px-10 h-16">
             <!-- Logo -->
             <a href="/"
-                class="flex items-center gap-2.5 font-extrabold text-xl tracking-tight no-underline text-[#e8edf5]">
-                <div class="w-2.5 h-2.5 bg-[#00e5ff] font-['Playfair_Display'] rounded-full shadow-[0_0_12px_#00e5ff] animate-pulse-dot"></div>
+                class="flex items-center gap-2.5 font-extrabold text-xl tracking-tight no-underline text-[#e8edf5] font-['Anta',sans-serif]">
+                <div class="w-2.5 h-2.5 bg-[#00e5ff] rounded-full shadow-[0_0_12px_#00e5ff] animate-pulse-dot"></div>
                 RTSLR
             </a>
 
@@ -116,12 +116,14 @@
             <div class="hidden md:flex gap-0.5">
                 <a href="/"
                     class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Index</a>
-                <a href="/inference"
+                <a href="/change-mode"
+                    class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Change Mode</a>
+                <a href="/dynamic/inference"
                     class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Inference</a>
-                <a href="/session-analytics"
+                <a href="/dynamic/session-analytics"
                     class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Sesssion
                     Analytics</a>
-                <a href="/dataset-analytics"
+                <a href="/dynamic/dataset-analytics"
                     class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#00e5ff] bg-[#00e5ff]/10">Dataset
                     Analytics</a>
             </div>
@@ -130,7 +132,7 @@
             <div class="flex items-center gap-3">
                 <!-- Model Status Badge (visible on all devices) -->
                 <div id="modelStatusBadge"
-                    class="flex items-center gap-2 py-1.5 px-3 sm:px-4 rounded-full text-[0.65rem] sm:text-xs font-bold font-['JetBrains_Mono',monospace] tracking-wide border border-[#00ffa3]/30 bg-[#00ffa3]/5 text-[#00ffa3]">
+                    class="flex items-center gap-2 py-1.5 px-3 sm:px-4 rounded-full text-[0.65rem] sm:text-xs font-bold font-['DM_Mono',monospace] tracking-wide border border-[#00ffa3]/30 bg-[#00ffa3]/5 text-[#00ffa3]">
                     <div class="w-1.5 h-1.5 rounded-full bg-[#00ffa3] animate-pulse-dot"></div>
                     <span class="hidden sm:inline">98.48% ACC</span>
                     <span class="sm:hidden">98.48%</span>
@@ -154,15 +156,19 @@
                     class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121] active:bg-[#0b1121] flex items-center gap-3">
                     Index
                 </a>
-                <a href="/inference"
+                <a href="/change-mode"
+                    class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121] active:bg-[#0b1121] flex items-center gap-3">
+                    Change Mode
+                </a>
+                <a href="/dynamic/inference"
                     class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121] active:bg-[#0b1121] flex items-center gap-3">
                     Inference
                 </a>
-                <a href="/session-analytics"
+                <a href="/dynamic/session-analytics"
                     class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121] active:bg-[#0b1121] flex items-center gap-3">
                     Analytics
                 </a>
-                <a href="/dataset-analytics"
+                <a href="/dynamic/dataset-analytics"
                     class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#00e5ff] bg-[#00e5ff]/10 transition-all hover:bg-[#00e5ff]/20 flex items-center gap-3">
                     Dataset Analytics
                 </a>
@@ -175,13 +181,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 relative">
             <div class="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-[#00e5ff]"></div>
             <div class="absolute bottom-2 right-4 w-12 h-12 border-b-2 border-r-2 border-[#00e5ff]"></div>
-            <div class="flex items-center gap-3 mb-3">
-                <span class="text-[0.6rem] tracking-[0.2em] uppercase text-[#00e5ff] font-['DM_Mono']">Performance
-                    Report · Final Year Project · ISL LSTM v1</span>
-                <span class="w-24 h-px bg-[#00e5ff]/30"></span>
-            </div>
-            <h1 class="font-['Playfair_Display'] text-3xl sm:text-4xl md:text-5xl font-black tracking-tight">
-                Model <span class="italic text-[#00e5ff]">Analytics</span><br>
+
+            <h1 class="font-['Anta',sans-serif] text-3xl sm:text-4xl md:text-5xl font-black tracking-tight">
+                Dynamic Model <span class="italic text-[#00e5ff]">Analytics</span><br>
                 &amp; F1 Scores
             </h1>
             <p class="text-sm text-[#5a6a82] max-w-xl mt-2 font-light leading-relaxed">
@@ -200,7 +202,7 @@
             <div class="flex items-baseline gap-3 mb-4 pb-2 border-b-2 border-[#1e2d47]">
                 <span
                     class="text-[0.65rem] font-['DM_Mono'] text-[#00e5ff] border border-[#00e5ff] px-1.5 py-0.5 rounded">01</span>
-                <h2 class="font-['Playfair_Display'] text-xl font-bold text-white">Key Performance Indicators</h2>
+                <h2 class="font-['Anta',sans-serif] text-xl font-bold text-white">Key Performance Indicators</h2>
                 <span class="text-[0.6rem] font-['DM_Mono'] text-[#5a6a82] ml-auto">Best checkpoint · Epoch 62 /
                     100</span>
             </div>
@@ -208,7 +210,7 @@
                 <div
                     class="bg-[#101828] border border-[#1e2d47] rounded p-4 shadow-sm hover:bg-[#0b1121] transition animate-fade-up">
                     <div class="w-6 h-1 rounded-full bg-[#00ffa3] mb-3"></div>
-                    <div class="text-3xl font-['Playfair_Display'] font-black text-[#00ffa3]">98.48<span
+                    <div class="text-3xl font-['Anta',sans-serif] font-black text-[#00ffa3]">98.48<span
                             class="text-xl">%</span></div>
                     <div class="text-[0.6rem] font-bold tracking-wider text-[#5a6a82] uppercase font-['DM_Mono'] mt-1">
                         Test Accuracy</div>
@@ -218,7 +220,7 @@
                 <div
                     class="bg-[#101828] border border-[#1e2d47] rounded p-4 shadow-sm hover:bg-[#0b1121] transition animate-fade-up delay-1">
                     <div class="w-6 h-1 rounded-full bg-[#00e5ff] mb-3"></div>
-                    <div class="text-3xl font-['Playfair_Display'] font-black text-[#00e5ff]">0.98</div>
+                    <div class="text-3xl font-['Anta',sans-serif] font-black text-[#00e5ff]">0.98</div>
                     <div class="text-[0.6rem] font-bold tracking-wider text-[#5a6a82] uppercase font-['DM_Mono'] mt-1">
                         Macro F1 Score</div>
                     <div class="text-[0.6rem] text-[#5a6a82] font-['DM_Mono'] mt-0.5">Weighted avg: 0.98</div>
@@ -226,7 +228,7 @@
                 <div
                     class="bg-[#101828] border border-[#1e2d47] rounded p-4 shadow-sm hover:bg-[#0b1121] transition animate-fade-up delay-2">
                     <div class="w-6 h-1 rounded-full bg-[#7c3aed] mb-3"></div>
-                    <div class="text-3xl font-['Playfair_Display'] font-black text-[#7c3aed]">3,279</div>
+                    <div class="text-3xl font-['Anta',sans-serif] font-black text-[#7c3aed]">3,279</div>
                     <div class="text-[0.6rem] font-bold tracking-wider text-[#5a6a82] uppercase font-['DM_Mono'] mt-1">
                         Total Sequences</div>
                     <div class="text-[0.6rem] text-[#5a6a82] font-['DM_Mono'] mt-0.5">2,623 train / 656 test</div>
@@ -234,7 +236,7 @@
                 <div
                     class="bg-[#101828] border border-[#1e2d47] rounded p-4 shadow-sm hover:bg-[#0b1121] transition animate-fade-up delay-3">
                     <div class="w-6 h-1 rounded-full bg-[#ff8c42] mb-3"></div>
-                    <div class="text-3xl font-['Playfair_Display'] font-black text-[#ff8c42]">49</div>
+                    <div class="text-3xl font-['Anta',sans-serif] font-black text-[#ff8c42]">49</div>
                     <div class="text-[0.6rem] font-bold tracking-wider text-[#5a6a82] uppercase font-['DM_Mono'] mt-1">
                         Gesture Classes</div>
                     <div class="text-[0.6rem] text-[#5a6a82] font-['DM_Mono'] mt-0.5">30 frames × 258 keypoints</div>
@@ -242,7 +244,7 @@
                 <div
                     class="bg-[#101828] border border-[#1e2d47] rounded p-4 shadow-sm hover:bg-[#0b1121] transition animate-fade-up delay-4">
                     <div class="w-6 h-1 rounded-full bg-[#ff4444] mb-3"></div>
-                    <div class="text-3xl font-['Playfair_Display'] font-black text-[#ff4444]">100</div>
+                    <div class="text-3xl font-['Anta',sans-serif] font-black text-[#ff4444]">100</div>
                     <div class="text-[0.6rem] font-bold tracking-wider text-[#5a6a82] uppercase font-['DM_Mono'] mt-1">
                         Epochs Trained</div>
                     <div class="text-[0.6rem] text-[#5a6a82] font-['DM_Mono'] mt-0.5">Best at epoch 62</div>
@@ -255,7 +257,7 @@
             <div class="flex items-baseline gap-3 mb-4 pb-2 border-b-2 border-[#1e2d47]">
                 <span
                     class="text-[0.65rem] font-['DM_Mono'] text-[#00e5ff] border border-[#00e5ff] px-1.5 py-0.5 rounded">02</span>
-                <h2 class="font-['Playfair_Display'] text-xl font-bold text-white">Model Overview</h2>
+                <h2 class="font-['Anta',sans-serif] text-xl font-bold text-white">Model Overview</h2>
                 <span class="text-[0.6rem] font-['DM_Mono'] text-[#5a6a82] ml-auto">LSTM · 2 layers · hidden: 128 ·
                     dropout: 0.5</span>
             </div>
@@ -268,7 +270,7 @@
                         <span class="bg-[#1a1a2e] text-white text-[0.55rem] px-2 py-0.5 rounded">ISL LSTM</span>
                     </div>
                     <div class="p-5 flex flex-col items-center text-center">
-                        <div class="text-5xl font-['Playfair_Display'] font-black text-[#00ffa3]">98<span
+                        <div class="text-5xl font-['Anta',sans-serif] font-black text-[#00ffa3]">98<span
                                 class="text-2xl">.48%</span></div>
                         <div class="text-[0.65rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82] mt-1">Test
                             Set Accuracy</div>
@@ -378,7 +380,7 @@
             <div class="flex items-baseline gap-3 mb-4 pb-2 border-b-2 border-[#1e2d47]">
                 <span
                     class="text-[0.65rem] font-['DM_Mono'] text-[#00e5ff] border border-[#00e5ff] px-1.5 py-0.5 rounded">03</span>
-                <h2 class="font-['Playfair_Display'] text-xl font-bold text-white">Training History</h2>
+                <h2 class="font-['Anta',sans-serif] text-xl font-bold text-white">Training History</h2>
                 <span class="text-[0.6rem] font-['DM_Mono'] text-[#5a6a82] ml-auto">18 new-best checkpoints recorded
                     over 100 epochs</span>
             </div>
@@ -448,7 +450,7 @@
             <div class="flex items-baseline gap-3 mb-4 pb-2 border-b-2 border-[#1e2d47]">
                 <span
                     class="text-[0.65rem] font-['DM_Mono'] text-[#00e5ff] border border-[#00e5ff] px-1.5 py-0.5 rounded">04</span>
-                <h2 class="font-['Playfair_Display'] text-xl font-bold text-white">Per-Class F1 Scores</h2>
+                <h2 class="font-['Anta',sans-serif] text-xl font-bold text-white">Per-Class F1 Scores</h2>
                 <span class="text-[0.6rem] font-['DM_Mono'] text-[#5a6a82] ml-auto">Sorted highest → lowest · 49 gesture
                     classes</span>
             </div>
@@ -483,7 +485,7 @@
             <div class="flex items-baseline gap-3 mb-4 pb-2 border-b-2 border-[#1e2d47]">
                 <span
                     class="text-[0.65rem] font-['DM_Mono'] text-[#00e5ff] border border-[#00e5ff] px-1.5 py-0.5 rounded">05</span>
-                <h2 class="font-['Playfair_Display'] text-xl font-bold text-white">Full Classification Report</h2>
+                <h2 class="font-['Anta',sans-serif] text-xl font-bold text-white">Full Classification Report</h2>
                 <span class="text-[0.6rem] font-['DM_Mono'] text-[#5a6a82] ml-auto">Precision · Recall · F1 · Support —
                     49 classes · 656 test samples</span>
             </div>
@@ -714,7 +716,7 @@
         // Full Classification Report population - now works with fixed f1Grade
         const f1Tbody = document.getElementById('f1Tbody');
         CLASS_DATA.forEach((d, i) => {
-            const [pillCls, grade] = f1Grade(d.f1); // ✅ Now receives array
+            const [pillCls, grade] = f1Grade(d.f1); // Now receives array
             const barCol = f1Color(d.f1);
             f1Tbody.innerHTML += `<tr class="border-b border-[#1e2d47] hover:bg-[#0b1121]"><td class="p-2 text-[0.68rem] font-['DM_Mono'] text-[#5a6a82]">${i + 1}</td><td class="p-2"><span class="text-sm font-['DM_Mono'] font-semibold text-white">${d.name.replace(/_/g, ' ')}</span></td><td class="p-2 text-right font-['DM_Mono'] text-sm text-[#5a6a82]">${d.p.toFixed(2)}</td><td class="p-2 text-right font-['DM_Mono'] text-sm text-[#5a6a82]">${d.r.toFixed(2)}</td><td class="p-2 text-right font-['DM_Mono'] text-sm font-bold" style="color:${barCol}">${d.f1.toFixed(2)}</td><td class="p-2"><div class="flex items-center gap-2"><div class="w-24 h-1.5 bg-[#1e2d47] rounded-full overflow-hidden"><div class="h-full rounded-full" style="width: ${d.f1 * 100}%; background: ${barCol};"></div></div><span class="text-[0.65rem] font-['DM_Mono']" style="color:${barCol}">${(d.f1 * 100).toFixed(0)}%</span></div></td><td class="p-2 text-right font-['DM_Mono'] text-sm text-[#5a6a82]">${d.sup}</td><td class="p-2"><span class="text-[0.58rem] font-['DM_Mono'] font-bold px-2 py-0.5 rounded ${pillCls}">${grade}</span></td></tr>`;
         });

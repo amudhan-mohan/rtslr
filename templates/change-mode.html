@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RTSLR - Choose Mode</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Anta:wght@400;700;800&family=Ubuntu:wght@300;400;500;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    body { font-family: 'Ubuntu', sans-serif; background: #04070f; color: #e8edf5; }
+    .font-display { font-family: 'Anta', sans-serif; }
+    .font-mono { font-family: 'DM Mono', monospace; }
+    
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+    
+    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.4)} }
+    .animate-pulse-dot { animation: pulse-dot 2s infinite; }
+    
+    .mode-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .mode-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,229,255,0.2);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+  <div class="max-w-4xl w-full">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <div class="flex items-center justify-center gap-3 mb-4">
+        <div class="w-3 h-3 bg-[#00e5ff] rounded-full shadow-[0_0_12px_#00e5ff] animate-pulse-dot"></div>
+        <h1 class="text-4xl font-extrabold font-display bg-gradient-to-r from-white via-white to-[#00e5ff] bg-clip-text text-transparent">
+          <a href="/">RTSLR</a>
+        </h1>
+      </div>
+      <p class="text-white/50 text-lg">Real-Time Sign Language Recognition</p>
+      <p class="text-[#5a6a82] text-sm mt-2 font-mono">Choose your recognition mode</p>
+    </div>
+
+    <!-- Mode Selection Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Dynamic Mode Card -->
+      <a href="/dynamic/inference" class="mode-card block bg-[#101828] border border-[#1e2d47] rounded-2xl p-8 hover:border-[#00e5ff]/50 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-[#00e5ff]/5 rounded-full -mr-16 -mt-16 transition-all group-hover:bg-[#00e5ff]/10"></div>
+        
+        <div class="relative z-10">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-[#00e5ff]/10 flex items-center justify-center">
+              <svg class="w-6 h-6 text-[#00e5ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold font-display text-[#00e5ff]">Dynamic Mode</h2>
+          </div>
+          
+          <p class="text-[#5a6a82] mb-6 leading-relaxed">
+            Real-time ISL gesture recognition using LSTM neural networks. Detects full words and sentences with continuous sign language.
+          </p>
+          
+          <div class="space-y-2 mb-6">
+            <div class="flex items-center gap-2 text-sm">
+              <span class="w-2 h-2 rounded-full {{ 'bg-[#00ffa3]' if dynamic_loaded else 'bg-[#ff4444]' }}"></span>
+              <span class="font-mono text-[#e8edf5]">
+                Model: {{ 'Loaded' if dynamic_loaded else 'Demo Mode' }}
+              </span>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              <span class="w-2 h-2 rounded-full bg-[#00e5ff]"></span>
+              <span class="font-mono text-[#e8edf5]">{{ dynamic_classes }} gesture classes</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              <span class="w-2 h-2 rounded-full bg-[#7c3aed]"></span>
+              <span class="font-mono text-[#e8edf5]">LSTM Architecture</span>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between pt-4 border-t border-[#1e2d47]">
+            <span class="text-[#5a6a82] text-sm">Continuous gestures</span>
+            <svg class="w-5 h-5 text-[#00e5ff] transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+      </a>
+
+      <!-- Static Mode Card -->
+      <a href="/static/inference" class="mode-card block bg-[#101828] border border-[#1e2d47] rounded-2xl p-8 hover:border-[#00ffa3]/50 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-[#00ffa3]/5 rounded-full -mr-16 -mt-16 transition-all group-hover:bg-[#00ffa3]/10"></div>
+        
+        <div class="relative z-10">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-[#00ffa3]/10 flex items-center justify-center">
+              <svg class="w-6 h-6 text-[#00ffa3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold font-display text-[#00ffa3]">Static Mode</h2>
+          </div>
+          
+          <p class="text-[#5a6a82] mb-6 leading-relaxed">
+            Fast letter and number recognition using scikit-learn. Perfect for spelling words character by character.
+          </p>
+          
+          <div class="space-y-2 mb-6">
+            <div class="flex items-center gap-2 text-sm">
+              <span class="w-2 h-2 rounded-full {{ 'bg-[#00ffa3]' if static_loaded else 'bg-[#ff4444]' }}"></span>
+              <span class="font-mono text-[#e8edf5]">
+                Model: {{ 'Loaded' if static_loaded else 'Demo Mode' }}
+              </span>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              <span class="w-2 h-2 rounded-full bg-[#00ffa3]"></span>
+              <span class="font-mono text-[#e8edf5]">{{ static_classes }} classes (A-Z, 0-9)</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              <span class="w-2 h-2 rounded-full bg-[#ff8c42]"></span>
+              <span class="font-mono text-[#e8edf5]">Turbo Mode</span>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between pt-4 border-t border-[#1e2d47]">
+            <span class="text-[#5a6a82] text-sm">Individual letters</span>
+            <svg class="w-5 h-5 text-[#00ffa3] transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="mt-12 text-center">
+      <p class="text-[#5a6a82] text-sm font-mono">
+        Both modes use MediaPipe Holistic for hand tracking
+      </p>
+      <div class="flex items-center justify-center gap-4 mt-4">
+        <div class="flex items-center gap-2 text-xs text-[#5a6a82]">
+          <div class="w-2 h-2 rounded-full bg-[#00e5ff]"></div>
+          <span>Dynamic</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-[#5a6a82]">
+          <div class="w-2 h-2 rounded-full bg-[#00ffa3]"></div>
+          <span>Static</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

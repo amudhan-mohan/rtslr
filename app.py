@@ -3,17 +3,58 @@ import cv2
 import numpy as np
 import torch
 import torch.nn as nn
-from collections import deque, Counter
 import threading
 import time
-import json
 import os
 import sys
+from collections import deque, Counter
+
+# ── JAX compatibility patch ──────────────────────────────────────────
+try:
+    import ml_dtypes
+    class MLDtypesMock:
+        def __init__(self, original_module):
+            self.original_module = original_module
+            self.fallback = np.int32
+        def __getattr__(self, name):
+            if hasattr(self.original_module, name):
+                return getattr(self.original_module, name)
+            return self.fallback
+    sys.modules['ml_dtypes'] = MLDtypesMock(ml_dtypes)
+except ImportError:
+    pass
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
+# ── Safe imports ───────────────────────────────────────────────────────
+JOBLIB_AVAILABLE = False
+try:
+    import joblib
+    JOBLIB_AVAILABLE = True
+except ImportError:
+    print("⚠️ joblib not installed. Install with: pip install joblib")
+
+MEDIAPIPE_AVAILABLE = False
+mp_pose = None
+mp_hands = None
+mp_holistic = None
+mp_drawing = None
+
+try:
+    import mediapipe as mp
+    MEDIAPIPE_AVAILABLE = True
+    mp_pose = mp.solutions.pose
+    mp_hands = mp.solutions.hands
+    mp_holistic = mp.solutions.holistic
+    mp_drawing = mp.solutions.drawing_utils
+    print("✅ MediaPipe imported successfully")
+except ImportError as e:
+    print(f"⚠️ MediaPipe not available: {e}")
 
 app = Flask(__name__)
 
 # ==========================================
-# Model Architecture
+# DYNAMIC MODE CONFIG (ISL Gestures - LSTM)
 # ==========================================
 class SignLanguageLSTM(nn.Module):
     def __init__(self, input_size=258, hidden_size=128, num_layers=2, num_classes=49, dropout=0.5):
@@ -27,10 +68,7 @@ class SignLanguageLSTM(nn.Module):
         final_out = self.dropout(out[:, -1, :])
         return self.fc(final_out)
 
-# ==========================================
-# Configuration
-# ==========================================
-CLASSES = [
+DYNAMIC_CLASSES = [
     "hello", "bye", "again", "you", "deaf", "hearing", "teacher",
     "thank_you", "welcome", "sorry", "correct", "wrong", "good",
     "morning", "understand", "yes", "no", "exam", "home", "work",
@@ -41,18 +79,28 @@ CLASSES = [
     "now", "help", "quiet"
 ]
 
-SEQUENCE_LENGTH = 30
-KEYPOINT_DIM = 258
-MODEL_PATH = 'sign_lstm_best.pt'
-EMA_ALPHA = 0.5
-CONFIDENCE_THRESHOLD = 0.85
-VOTING_THRESHOLD = 12
-BUFFER_SIZE = 20
+DYNAMIC_SEQUENCE_LENGTH = 30
+DYNAMIC_KEYPOINT_DIM = 258
+DYNAMIC_MODEL_PATH = 'sign_lstm_best.pt'
+DYNAMIC_EMA_ALPHA = 0.5
+DYNAMIC_CONFIDENCE_THRESHOLD = 0.85
+DYNAMIC_VOTING_THRESHOLD = 12
+DYNAMIC_BUFFER_SIZE = 20
 
 # ==========================================
-# Global State
+# STATIC MODE CONFIG (Letters - sklearn)
 # ==========================================
-state = {
+STATIC_MODEL_PATH = 'isl_alphabet_model.pkl'
+STATIC_VOTING_BUFFER_SIZE = 8
+STATIC_MIN_VOTES = 4
+STATIC_CONFIDENCE_THRESHOLD = 65
+STATIC_CLASSES = list('ABCDEFGHIJKLMNOPQRSTUVWXYZ') + [str(i) for i in range(10)]
+
+# ==========================================
+# GLOBAL STATE
+# ==========================================
+# Dynamic mode state
+dynamic_state = {
     "current_prediction": "Waiting...",
     "confidence": 0.0,
     "all_probs": {},
@@ -62,72 +110,71 @@ state = {
     "running": True,
     "camera_active": False,
 }
-state_lock = threading.Lock()
 
-# Global camera object
-cap = None
+# Static mode state
+static_state = {
+    "letter": "—",
+    "confidence": 0.0,
+    "all_probs": {},
+    "hand_present": False,
+    "history": [],
+    "counts": {},
+    "total": 0,
+    "word": [],
+    "sentence": [],
+    "camera_active": False,
+}
+
+state_lock = threading.Lock()
+dynamic_lock = threading.Lock()
+static_lock = threading.Lock()
+
+# Global camera objects
+dynamic_cap = None
+static_cap = None
 cap_lock = threading.Lock()
 
 # ==========================================
-# Try to import MediaPipe with fallback
-# ==========================================
-MEDIAPIPE_AVAILABLE = False
-mp_pose = None
-mp_hands = None
-mp_drawing = None
-
-try:
-    import mediapipe as mp
-    MEDIAPIPE_AVAILABLE = True
-    mp_pose = mp.solutions.pose
-    mp_hands = mp.solutions.hands
-    mp_drawing = mp.solutions.drawing_utils
-    print("✅ MediaPipe imported successfully")
-except ImportError as e:
-    print(f"⚠️ MediaPipe not available: {e}")
-except AttributeError as e:
-    print(f"⚠️ MediaPipe attribute error: {e}")
-    # Try alternative import
-    try:
-        import mediapipe.python.solutions as mp_solutions
-        mp_pose = mp_solutions.pose
-        mp_hands = mp_solutions.hands
-        mp_drawing = mp_solutions.drawing_utils
-        MEDIAPIPE_AVAILABLE = True
-        print("✅ MediaPipe imported via alternative path")
-    except:
-        print("⚠️ MediaPipe completely unavailable")
-
-# ==========================================
-# Load Model
+# LOAD MODELS
 # ==========================================
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-MODEL_LOADED = False
-model = None
+DYNAMIC_MODEL_LOADED = False
+dynamic_model = None
 
-if os.path.exists(MODEL_PATH):
+if os.path.exists(DYNAMIC_MODEL_PATH):
     try:
-        model = SignLanguageLSTM(input_size=KEYPOINT_DIM, num_classes=len(CLASSES)).to(device)
-        model.load_state_dict(torch.load(MODEL_PATH, map_location=device, weights_only=True))
-        model.eval()
-        MODEL_LOADED = True
-        print(f"✅ Model loaded successfully on {device}")
-        print(f"📊 Model classes: {len(CLASSES)} gesture classes")
+        dynamic_model = SignLanguageLSTM(input_size=DYNAMIC_KEYPOINT_DIM, num_classes=len(DYNAMIC_CLASSES)).to(device)
+        dynamic_model.load_state_dict(torch.load(DYNAMIC_MODEL_PATH, map_location=device, weights_only=True))
+        dynamic_model.eval()
+        DYNAMIC_MODEL_LOADED = True
+        print(f"✅ Dynamic model loaded successfully on {device}")
     except Exception as e:
-        print(f"⚠️ Model not loaded: {e}. Running in demo mode.")
-        MODEL_LOADED = False
+        print(f"⚠️ Dynamic model not loaded: {e}. Running in demo mode.")
 else:
-    print(f"⚠️ Model file not found at {MODEL_PATH}. Running in demo mode.")
-    MODEL_LOADED = False
+    print(f"⚠️ Dynamic model file not found at {DYNAMIC_MODEL_PATH}. Running in demo mode.")
+
+# Load static model
+STATIC_MODEL_LOADED = False
+clf = None
+
+if JOBLIB_AVAILABLE and os.path.exists(STATIC_MODEL_PATH):
+    try:
+        clf = joblib.load(STATIC_MODEL_PATH)
+        STATIC_MODEL_LOADED = True
+        print(f"✅ Static model loaded — {len(STATIC_CLASSES)} classes")
+    except Exception as e:
+        print(f"⚠️ Static model load failed ({e}). Running in demo mode.")
+else:
+    if not os.path.exists(STATIC_MODEL_PATH):
+        print(f"⚠️ Static model file not found: {STATIC_MODEL_PATH}. Running in demo mode.")
 
 # ==========================================
-# Helper Functions (without MediaPipe dependency)
+# HELPER FUNCTIONS
 # ==========================================
 def extract_keypoints(pose_results, hand_results):
-    """Extract pose and hand keypoints (simplified for demo mode)"""
-    # If MediaPipe is not available, return zeros
+    """Extract pose and hand keypoints for dynamic mode"""
     if not MEDIAPIPE_AVAILABLE:
-        return np.zeros(KEYPOINT_DIM)
+        return np.zeros(DYNAMIC_KEYPOINT_DIM)
     
     try:
         if pose_results and hasattr(pose_results, 'pose_landmarks') and pose_results.pose_landmarks:
@@ -149,10 +196,10 @@ def extract_keypoints(pose_results, hand_results):
         return np.concatenate([pose, lh, rh])
     except Exception as e:
         print(f"Keypoint extraction error: {e}")
-        return np.zeros(KEYPOINT_DIM)
+        return np.zeros(DYNAMIC_KEYPOINT_DIM)
 
 def normalize_frame(frame):
-    """Normalize keypoints relative to hip center and shoulder distance"""
+    """Normalize keypoints for dynamic mode"""
     try:
         frame = frame.copy()
         pose = frame[0:132].reshape(33, 4)
@@ -191,20 +238,38 @@ def apply_ema(current_lms, prev_lms, alpha):
         return current_lms
     return current_lms * alpha + prev_lms * (1 - alpha)
 
+def extract_features(results):
+    """Extract features for static mode"""
+    pose = (np.array([[r.x, r.y, r.z, r.visibility]
+                       for r in results.pose_landmarks.landmark]).flatten()
+            if results.pose_landmarks else np.zeros(33 * 4))
+
+    def get_hand(hand_lms):
+        if not hand_lms:
+            return np.zeros(21 * 3 + 5)
+        coords = np.array([[lm.x, lm.y, lm.z] for lm in hand_lms.landmark])
+        relative = (coords - coords[0]).flatten()
+        tips = [4, 8, 12, 16, 20]
+        distances = [np.linalg.norm(coords[t] - coords[0]) for t in tips]
+        return np.concatenate([relative, distances])
+
+    lh = get_hand(results.left_hand_landmarks)
+    rh = get_hand(results.right_hand_landmarks)
+    return np.concatenate([pose, lh, rh])
+
 # ==========================================
-# Video Generator (Production Version)
+# VIDEO GENERATORS
 # ==========================================
-def generate_frames():
-    global cap
+def generate_dynamic_frames():
+    """Video generator for dynamic mode (ISL gestures)"""
+    global dynamic_cap
     
-    sequence = deque(maxlen=SEQUENCE_LENGTH)
-    prediction_buffer = deque(maxlen=BUFFER_SIZE)
+    sequence = deque(maxlen=DYNAMIC_SEQUENCE_LENGTH)
+    prediction_buffer = deque(maxlen=DYNAMIC_BUFFER_SIZE)
     previous_landmarks = None
     
-    # For demo mode when model not loaded
-    demo_mode = not MODEL_LOADED
+    demo_mode = not DYNAMIC_MODEL_LOADED
     
-    # Initialize MediaPipe context managers only if available
     pose_ctx = None
     hands_ctx = None
     
@@ -218,36 +283,32 @@ def generate_frames():
         hands = None
     
     try:
-        while state["running"]:
+        while dynamic_state["running"]:
             try:
-                # Check camera state
-                with state_lock:
-                    camera_active = state["camera_active"]
+                with dynamic_lock:
+                    camera_active = dynamic_state["camera_active"]
                 
-                # Handle camera initialization when turned ON
-                if camera_active and cap is None:
+                if camera_active and dynamic_cap is None:
                     with cap_lock:
-                        cap = cv2.VideoCapture(0)
-                        if not cap.isOpened():
-                            print("❌ Failed to open camera")
-                            with state_lock:
-                                state["camera_active"] = False
+                        dynamic_cap = cv2.VideoCapture(0)
+                        if not dynamic_cap.isOpened():
+                            print("❌ Failed to open dynamic camera")
+                            with dynamic_lock:
+                                dynamic_state["camera_active"] = False
                                 camera_active = False
                         else:
-                            print("✅ Camera started successfully")
+                            print("✅ Dynamic camera started")
                 
-                # Handle camera release when turned OFF
-                if not camera_active and cap is not None:
+                if not camera_active and dynamic_cap is not None:
                     with cap_lock:
-                        cap.release()
-                        cap = None
-                        print("📷 Camera stopped")
+                        dynamic_cap.release()
+                        dynamic_cap = None
+                        print("📷 Dynamic camera stopped")
                         sequence.clear()
                         prediction_buffer.clear()
                         previous_landmarks = None
                 
-                # If camera is OFF or not available, show placeholder
-                if not camera_active or cap is None:
+                if not camera_active or dynamic_cap is None:
                     frame = np.zeros((480, 640, 3), dtype=np.uint8)
                     cv2.putText(frame, "CAMERA OFF", (220, 240), 
                                cv2.FONT_HERSHEY_SIMPLEX, 1, (90, 106, 130), 2)
@@ -257,22 +318,17 @@ def generate_frames():
                     if demo_mode:
                         cv2.putText(frame, "DEMO MODE - Model not loaded", (180, 320), 
                                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 229, 255), 1)
-                    if not MEDIAPIPE_AVAILABLE:
-                        cv2.putText(frame, "MediaPipe not available - Demo Mode", (170, 350), 
-                                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 100, 200), 1)
                     
                     _, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
                     frame_bytes = buffer.tobytes()
-                    yield (b'--frame\r\n'
-                           b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+                    yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
                     time.sleep(0.05)
                     continue
                 
-                # Camera is ON - capture frame
                 with cap_lock:
-                    if cap is None:
+                    if dynamic_cap is None:
                         continue
-                    ret, frame = cap.read()
+                    ret, frame = dynamic_cap.read()
                 
                 if not ret:
                     time.sleep(0.01)
@@ -280,7 +336,6 @@ def generate_frames():
                 
                 frame = cv2.flip(frame, 1)
                 
-                # Process with MediaPipe if available
                 pose_res = None
                 hand_res = None
                 
@@ -291,7 +346,6 @@ def generate_frames():
                     hand_res = hands.process(img_rgb)
                     img_rgb.flags.writeable = True
                     
-                    # Draw landmarks if available
                     if pose_res and pose_res.pose_landmarks and mp_drawing:
                         mp_drawing.draw_landmarks(
                             frame, pose_res.pose_landmarks, mp_pose.POSE_CONNECTIONS,
@@ -306,17 +360,15 @@ def generate_frames():
                                 mp_drawing.DrawingSpec(color=(255, 100, 0), thickness=2)
                             )
                 
-                # Only do inference if model is loaded
                 if not demo_mode and MEDIAPIPE_AVAILABLE:
                     try:
-                        # Keypoint pipeline
                         keypoints = extract_keypoints(pose_res, hand_res)
                         normalized_keypoints = normalize_frame(keypoints)
-                        smoothed_keypoints = apply_ema(normalized_keypoints, previous_landmarks, EMA_ALPHA)
+                        smoothed_keypoints = apply_ema(normalized_keypoints, previous_landmarks, DYNAMIC_EMA_ALPHA)
                         previous_landmarks = smoothed_keypoints
                         sequence.append(smoothed_keypoints)
                         
-                        if len(sequence) == SEQUENCE_LENGTH:
+                        if len(sequence) == DYNAMIC_SEQUENCE_LENGTH:
                             seq_array = np.array(sequence)
                             motion_variance = np.var(seq_array, axis=0).mean()
                             
@@ -326,27 +378,27 @@ def generate_frames():
                             else:
                                 input_tensor = torch.tensor(seq_array, dtype=torch.float32).unsqueeze(0).to(device)
                                 with torch.no_grad():
-                                    res = model(input_tensor)
+                                    res = dynamic_model(input_tensor)
                                     probs = torch.softmax(res, dim=1).cpu().numpy()[0]
                                 
                                 max_idx = np.argmax(probs)
                                 local_confidence = float(probs[max_idx])
-                                all_probs = {CLASSES[i]: float(probs[i]) for i in range(len(CLASSES))}
+                                all_probs = {DYNAMIC_CLASSES[i]: float(probs[i]) for i in range(len(DYNAMIC_CLASSES))}
                                 
-                                if local_confidence > CONFIDENCE_THRESHOLD:
-                                    local_prediction = CLASSES[max_idx]
+                                if local_confidence > DYNAMIC_CONFIDENCE_THRESHOLD:
+                                    local_prediction = DYNAMIC_CLASSES[max_idx]
                                 
                                 prediction_buffer.append(local_prediction)
                                 
                                 if len(prediction_buffer) > 0:
                                     vote_tally = Counter(prediction_buffer).most_common(1)[0]
                                     winning_gesture, winning_votes = vote_tally
-                                    if winning_votes >= VOTING_THRESHOLD:
-                                        with state_lock:
-                                            prev = state["current_prediction"]
-                                            state["current_prediction"] = winning_gesture
-                                            state["confidence"] = local_confidence
-                                            state["all_probs"] = all_probs
+                                    if winning_votes >= DYNAMIC_VOTING_THRESHOLD:
+                                        with dynamic_lock:
+                                            prev = dynamic_state["current_prediction"]
+                                            dynamic_state["current_prediction"] = winning_gesture
+                                            dynamic_state["confidence"] = local_confidence
+                                            dynamic_state["all_probs"] = all_probs
                                             
                                             if winning_gesture not in ["Idle", "Waiting...", "Thinking..."] and winning_gesture != prev:
                                                 entry = {
@@ -354,79 +406,236 @@ def generate_frames():
                                                     "confidence": round(local_confidence * 100, 1),
                                                     "timestamp": time.strftime("%H:%M:%S")
                                                 }
-                                                state["history"].insert(0, entry)
-                                                state["history"] = state["history"][:50]
-                                                state["session_counts"][winning_gesture] = state["session_counts"].get(winning_gesture, 0) + 1
-                                                state["total_predictions"] += 1
-                                                print(f"🎯 Gesture detected: {winning_gesture} ({local_confidence*100:.1f}%)")
+                                                dynamic_state["history"].insert(0, entry)
+                                                dynamic_state["history"] = dynamic_state["history"][:50]
+                                                dynamic_state["session_counts"][winning_gesture] = dynamic_state["session_counts"].get(winning_gesture, 0) + 1
+                                                dynamic_state["total_predictions"] += 1
                     except Exception as e:
-                        print(f"⚠️ Inference error: {e}")
+                        print(f"⚠️ Dynamic inference error: {e}")
                 
-                # Encode and yield frame
                 _, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
                 frame_bytes = buffer.tobytes()
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+                yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
                        
             except Exception as e:
-                print(f"❌ Frame generation error: {e}")
+                print(f"❌ Dynamic frame generation error: {e}")
                 continue
     
     finally:
-        # Clean up MediaPipe contexts
         if pose_ctx:
             pose_ctx.__exit__(None, None, None)
         if hands_ctx:
             hands_ctx.__exit__(None, None, None)
-        if cap is not None:
-            cap.release()
+        if dynamic_cap is not None:
+            dynamic_cap.release()
+
+def generate_static_frames():
+    """Video generator for static mode (Letters)"""
+    global static_cap
     
-    print("🛑 Video generator stopped")
+    prediction_history = deque(maxlen=STATIC_VOTING_BUFFER_SIZE)
+    holistic = mp_holistic.Holistic(model_complexity=0, min_detection_confidence=0.5, min_tracking_confidence=0.5) if MEDIAPIPE_AVAILABLE and mp_holistic else None
+    
+    last_letter = None
+    last_log_time = 0
+    last_stable_letter = None
+
+    try:
+        while True:
+            with static_lock:
+                camera_should_run = static_state["camera_active"]
+            
+            if camera_should_run:
+                with cap_lock:
+                    if static_cap is None or not static_cap.isOpened():
+                        static_cap = cv2.VideoCapture(0)
+                        if not static_cap.isOpened():
+                            print("❌ Failed to open static camera")
+                            with static_lock:
+                                static_state["camera_active"] = False
+                            err = np.zeros((480, 640, 3), dtype=np.uint8)
+                            cv2.putText(err, "CAMERA NOT FOUND", (140,240), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,0,255), 2)
+                            _, buf = cv2.imencode('.jpg', err)
+                            yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buf.tobytes() + b'\r\n')
+                            time.sleep(0.5)
+                            continue
+                        static_cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+                        static_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+                        print("✅ Static camera opened")
+                
+                with cap_lock:
+                    ret, frame = (static_cap.read() if static_cap and static_cap.isOpened() else (False, None))
+                
+                if ret:
+                    frame = cv2.flip(frame, 1)
+                    
+                    if holistic and MEDIAPIPE_AVAILABLE:
+                        img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                        img_rgb.flags.writeable = False
+                        results = holistic.process(img_rgb)
+                        img_rgb.flags.writeable = True
+
+                        if results.left_hand_landmarks and mp_drawing:
+                            mp_drawing.draw_landmarks(frame, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS,
+                                mp_drawing.DrawingSpec(color=(255,200,0), thickness=2, circle_radius=3),
+                                mp_drawing.DrawingSpec(color=(255,120,0), thickness=2))
+                        if results.right_hand_landmarks and mp_drawing:
+                            mp_drawing.draw_landmarks(frame, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS,
+                                mp_drawing.DrawingSpec(color=(0,220,255), thickness=2, circle_radius=3),
+                                mp_drawing.DrawingSpec(color=(0,160,255), thickness=2))
+                    else:
+                        results = None
+
+                    letter, confidence, all_probs = "—", 0.0, {}
+                    hand_present = bool(results and (results.left_hand_landmarks or results.right_hand_landmarks)) if results else False
+                    
+                    if hand_present and STATIC_MODEL_LOADED and results:
+                        try:
+                            feats = extract_features(results).reshape(1, -1)
+                            raw = clf.predict(feats)[0]
+                            probs = clf.predict_proba(feats)[0]
+                            confidence = float(np.max(probs)) * 100
+                            all_probs = {str(cls): round(float(p)*100, 1) for cls, p in zip(clf.classes_, probs)}
+                            
+                            if confidence >= STATIC_CONFIDENCE_THRESHOLD:
+                                prediction_history.append(raw)
+                                tally = Counter(prediction_history).most_common(1)[0]
+                                if tally[1] >= STATIC_MIN_VOTES:
+                                    letter = str(tally[0])
+                                    last_stable_letter = letter
+                                
+                                now = time.time()
+                                if letter != "—" and (letter != last_letter or now - last_log_time > 1.0):
+                                    if letter != last_letter:
+                                        last_letter, last_log_time = letter, now
+                                        with static_lock:
+                                            entry = {"letter": letter, "conf": round(confidence,1), "time": time.strftime("%H:%M:%S")}
+                                            static_state["history"].insert(0, entry)
+                                            static_state["history"] = static_state["history"][:60]
+                                            static_state["counts"][letter] = static_state["counts"].get(letter, 0) + 1
+                                            static_state["total"] += 1
+                        except Exception as e:
+                            print(f"⚠️ Static inference error: {e}")
+                    else:
+                        prediction_history.clear()
+                        if not hand_present:
+                            last_letter = None
+                            last_stable_letter = None
+
+                    with static_lock:
+                        static_state["letter"] = last_stable_letter if last_stable_letter else "—"
+                        static_state["confidence"] = confidence
+                        static_state["all_probs"] = all_probs
+                        static_state["hand_present"] = hand_present
+
+                    if last_stable_letter and last_stable_letter != "—":
+                        cv2.putText(frame, last_stable_letter, (20, 40), 
+                                   cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 100), 3, cv2.LINE_AA)
+
+                    _, buf = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
+                    yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buf.tobytes() + b'\r\n')
+                else:
+                    err = np.zeros((480, 640, 3), dtype=np.uint8)
+                    cv2.putText(err, "Capture error", (200,240), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
+                    _, buf = cv2.imencode('.jpg', err)
+                    yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buf.tobytes() + b'\r\n')
+                    time.sleep(0.05)
+            else:
+                placeholder = np.zeros((480, 640, 3), dtype=np.uint8)
+                cv2.putText(placeholder, "CAMERA OFF", (220,240), cv2.FONT_HERSHEY_SIMPLEX, 1, (90,106,130), 2)
+                cv2.putText(placeholder, "Click 'Turn On' to start", (180,280), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (90,106,130), 1)
+                _, buf = cv2.imencode('.jpg', placeholder, [cv2.IMWRITE_JPEG_QUALITY, 80])
+                yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buf.tobytes() + b'\r\n')
+                time.sleep(0.05)
+    finally:
+        with cap_lock:
+            if static_cap:
+                static_cap.release()
+                static_cap = None
+        if holistic:
+            holistic.close()
 
 # ==========================================
-# Routes
+# ROUTES
 # ==========================================
 @app.route('/')
 def index():
-    return render_template('index.html', classes=CLASSES, model_loaded=MODEL_LOADED)
+    return render_template('index.html', dynamic_loaded=DYNAMIC_MODEL_LOADED,
+                          static_loaded=STATIC_MODEL_LOADED,
+                          dynamic_classes=len(DYNAMIC_CLASSES),
+                          static_classes=len(STATIC_CLASSES))
 
-@app.route('/inference')
-def inference():
-    return render_template('inference.html', classes=CLASSES, model_loaded=MODEL_LOADED)
+@app.route('/change-mode')
+def change_mode():
+    """Change Mode page - choose between Dynamic and Static"""
+    return render_template('change-mode.html', 
+                          dynamic_loaded=DYNAMIC_MODEL_LOADED,
+                          static_loaded=STATIC_MODEL_LOADED,
+                          dynamic_classes=len(DYNAMIC_CLASSES),
+                          static_classes=len(STATIC_CLASSES))
 
-@app.route('/session-analytics')
-def sessionanalytics():
-    return render_template('analytics.html', classes=CLASSES)
+@app.route('/dynamic/inference')
+def dynamic_inference():
+    return render_template('inference.html', classes=DYNAMIC_CLASSES, model_loaded=DYNAMIC_MODEL_LOADED)
 
-@app.route('/dataset-analytics')
-def datasetanalytics():
-    return render_template('data_analytics.html', classes=CLASSES)
+@app.route('/dynamic/session-analytics')
+def dynamic_session_analytics():
+    return render_template('analytics.html', classes=DYNAMIC_CLASSES)
 
-@app.route('/video_feed')
-def video_feed():
-    return Response(generate_frames(),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+@app.route('/dynamic/dataset-analytics')
+def dynamic_dataset_analytics():
+    return render_template('data_analytics.html', classes=DYNAMIC_CLASSES)
 
-@app.route('/api/state')
-def get_state():
-    with state_lock:
+@app.route('/static/inference')
+def static_inference():
+    return render_template('static_inference.html')
+
+@app.route('/static/session-analytics')
+def static_session_analytics():
+    return render_template('static_analytics.html')
+
+@app.route('/dynamic/video_feed')
+def dynamic_video_feed():
+    return Response(generate_dynamic_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/static/video_feed')
+def static_video_feed():
+    return Response(generate_static_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/dynamic/api/state')
+def dynamic_get_state():
+    with dynamic_lock:
         return jsonify({
-            "prediction": state["current_prediction"],
-            "confidence": round(state["confidence"] * 100, 1),
-            "all_probs": {k: round(v * 100, 1) for k, v in state["all_probs"].items()},
-            "history": state["history"][:10],
-            "total_predictions": state["total_predictions"],
-            "session_counts": state["session_counts"],
-            "running": state["running"],
-            "model_loaded": MODEL_LOADED
+            "prediction": dynamic_state["current_prediction"],
+            "confidence": round(dynamic_state["confidence"] * 100, 1),
+            "all_probs": {k: round(v * 100, 1) for k, v in dynamic_state["all_probs"].items()},
+            "history": dynamic_state["history"][:10],
+            "total_predictions": dynamic_state["total_predictions"],
+            "session_counts": dynamic_state["session_counts"],
+            "running": dynamic_state["running"],
+            "model_loaded": DYNAMIC_MODEL_LOADED
         })
 
-@app.route('/api/analytics')
-def get_analytics():
-    with state_lock:
-        counts = state["session_counts"]
-        total = state["total_predictions"]
-        history = state["history"]
+@app.route('/static/api/state')
+def static_get_state():
+    with static_lock:
+        return jsonify({
+            "letter": static_state["letter"],
+            "confidence": round(static_state["confidence"], 1),
+            "all_probs": static_state["all_probs"],
+            "hand_present": static_state["hand_present"],
+            "history": static_state["history"][:12],
+            "total": static_state["total"],
+            "unique": len(static_state["counts"]),
+            "session_counts": static_state["counts"],
+        })
+
+@app.route('/dynamic/api/analytics')
+def dynamic_get_analytics():
+    with dynamic_lock:
+        counts = dynamic_state["session_counts"]
+        total = dynamic_state["total_predictions"]
+        history = dynamic_state["history"]
 
         if history:
             avg_conf = sum(h["confidence"] for h in history) / len(history)
@@ -442,81 +651,111 @@ def get_analytics():
             "top_gestures": [{"gesture": g, "count": c, "pct": round(c/max(total,1)*100,1)} for g, c in top],
             "history": history[:20],
             "all_counts": counts,
-            "model_loaded": MODEL_LOADED
+            "model_loaded": DYNAMIC_MODEL_LOADED
         })
 
-@app.route('/api/camera/control', methods=['POST'])
-def camera_control():
+@app.route('/static/api/analytics')
+def static_get_analytics():
+    with static_lock:
+        hist, counts, total = static_state["history"], static_state["counts"], static_state["total"]
+        avg_conf = (sum(h["conf"] for h in hist) / len(hist)) if hist else 0
+        top = sorted(counts.items(), key=lambda x: x[1], reverse=True)[:15]
+        return jsonify({
+            "total": total, "unique": len(counts), "avg_conf": round(avg_conf, 1),
+            "top": [{"letter": l, "count": c, "pct": round(c / max(total, 1) * 100, 1)} for l, c in top],
+            "history": hist[:30], "all_counts": counts,
+        })
+
+@app.route('/dynamic/api/camera/control', methods=['POST'])
+def dynamic_camera_control():
     try:
         data = request.get_json()
         camera_on = data.get('camera_on', False)
         
-        with state_lock:
-            state["camera_active"] = camera_on
-            print(f"📷 Camera state set to: {'ON' if camera_on else 'OFF'}")
+        with dynamic_lock:
+            dynamic_state["camera_active"] = camera_on
+            print(f"📷 Dynamic camera: {'ON' if camera_on else 'OFF'}")
         
         return jsonify({
             "success": True,
             "camera_on": camera_on,
-            "message": f"Camera turned {'ON' if camera_on else 'OFF'} successfully"
+            "message": f"Dynamic camera turned {'ON' if camera_on else 'OFF'}"
         })
-        
     except Exception as e:
-        print(f"Error in camera_control: {e}")
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+        return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/api/clear_history', methods=['POST'])
-def clear_history():
+@app.route('/static/api/camera/control', methods=['POST'])
+def static_camera_control():
     try:
-        with state_lock:
-            state["history"] = []
-            state["session_counts"] = {}
-            state["total_predictions"] = 0
-            state["current_prediction"] = "Waiting..."
-            state["confidence"] = 0.0
-            state["all_probs"] = {}
+        data = request.get_json()
+        camera_on = data.get('camera_on', False)
         
-        print("🗑️ History cleared")
+        with static_lock:
+            static_state["camera_active"] = camera_on
+            print(f"📷 Static camera: {'ON' if camera_on else 'OFF'}")
+        
         return jsonify({
             "success": True,
-            "message": "History cleared successfully"
+            "camera_on": camera_on,
+            "message": f"Static camera turned {'ON' if camera_on else 'OFF'}"
         })
-        
     except Exception as e:
-        print(f"Error in clear_history: {e}")
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/dynamic/api/clear_history', methods=['POST'])
+def dynamic_clear_history():
+    try:
+        with dynamic_lock:
+            dynamic_state["history"] = []
+            dynamic_state["session_counts"] = {}
+            dynamic_state["total_predictions"] = 0
+            dynamic_state["current_prediction"] = "Waiting..."
+            dynamic_state["confidence"] = 0.0
+            dynamic_state["all_probs"] = {}
+        
+        print("🗑️ Dynamic history cleared")
+        return jsonify({"success": True, "message": "Dynamic history cleared"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/static/api/clear_history', methods=['POST'])
+def static_clear_history():
+    try:
+        with static_lock:
+            static_state["history"] = []
+            static_state["counts"] = {}
+            static_state["total"] = 0
+        
+        print("🗑️ Static history cleared")
+        return jsonify({"success": True, "message": "Static history cleared"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/health')
 def health_check():
     return jsonify({
         "status": "healthy",
-        "model_loaded": MODEL_LOADED,
+        "dynamic_model_loaded": DYNAMIC_MODEL_LOADED,
+        "static_model_loaded": STATIC_MODEL_LOADED,
         "mediapipe_available": MEDIAPIPE_AVAILABLE,
-        "camera_active": state["camera_active"],
-        "total_predictions": state["total_predictions"]
+        "dynamic_camera_active": dynamic_state["camera_active"],
+        "static_camera_active": static_state["camera_active"],
     }), 200
 
 # ==========================================
-# Production Entry Point
+# MAIN
 # ==========================================
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
     
-    print("=" * 50)
-    print("🚀 RTSLR Server Starting...")
-    print(f"📊 Model Loaded: {MODEL_LOADED}")
-    print(f"🎥 MediaPipe Available: {MEDIAPIPE_AVAILABLE}")
+    print("=" * 60)
+    print("🚀 RTSLR Unified Server Starting...")
+    print(f"📊 Dynamic Model: {DYNAMIC_MODEL_LOADED} | Static Model: {STATIC_MODEL_LOADED}")
+    print(f"🎥 MediaPipe: {MEDIAPIPE_AVAILABLE}")
     print(f"💻 Device: {device}")
-    print(f"🎯 Classes: {len(CLASSES)}")
+    print(f"🎯 Dynamic Classes: {len(DYNAMIC_CLASSES)} | Static Classes: {len(STATIC_CLASSES)}")
     print(f"🔌 Port: {port}")
-    print(f"🐛 Debug Mode: {debug_mode}")
-    print("=" * 50)
+    print("=" * 60)
     
     app.run(debug=debug_mode, host='0.0.0.0', port=port, threaded=True)

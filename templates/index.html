@@ -15,20 +15,30 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Anta:wght@400;700;800&family=Ubuntu:wght@300;400;500;700&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
     rel="stylesheet" />
 
   <style>
-    /* ── Font Override (use Syne as display, Inter as body) ── */
+    /* ── Font Override ── */
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Ubuntu', sans-serif;
       background: #000;
       color: #fff;
     }
 
     .font-display {
+      font-family: 'Anta', sans-serif;
+    }
+
+    .font-Syne {
       font-family: 'Syne', sans-serif;
     }
+
+    .hero-title,
+    .section-title {
+      font-family: 'Anta', sans-serif;
+    }
+
 
     /* ── Glassmorphism ── */
     .glass-card {
@@ -128,7 +138,7 @@
     }
 
     .section-title {
-      font-family: 'Syne', sans-serif;
+      font-family: 'Anta', sans-serif;
       font-weight: 700;
       font-size: clamp(1.75rem, 4vw, 3.25rem);
       line-height: 1.1;
@@ -412,7 +422,7 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       padding: 20px;
-      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-family: 'JetBrains Mono', monospace;
       font-size: clamp(11px, 3vw, 13px);
       line-height: 1.8;
       overflow-x: auto;
@@ -528,7 +538,7 @@
           </svg>
         </div>
         <span class="font-display font-700 text-white text-sm xs:inline"
-          style="font-family:'Syne',sans-serif;font-weight:700">RTSLR</span>
+          style="font-family:'Anta',sans-serif;font-weight:700">RTSLR</span>
       </a>
 
       <!-- Desktop Navigation Links (hidden on tablet/mobile) -->
@@ -544,12 +554,12 @@
       <!-- Right side items (CTA + Mobile Menu) -->
       <div class="flex items-center gap-3">
         <!-- CTA Button -->
-        <a href="/inference" class="btn-primary text-sm py-2 px-5 hidden sm:inline-flex">
+        <a href="/change-mode" class="btn-primary text-sm py-2 px-5 hidden sm:inline-flex">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10" />
             <polygon points="10 8 16 12 10 16 10 8" />
           </svg>
-          Inference
+          Change Mode
         </a>
 
         <!-- Mobile Menu Hamburger Button -->
@@ -580,13 +590,13 @@
         <a href="#team"
           class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-white/60 transition-all hover:text-white hover:bg-white/10 flex items-center gap-3">Team</a>
         <div class="border-t border-white/10 my-2"></div>
-        <a href="/inference"
+        <a href="/change-mode"
           class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#0071e3] bg-[#0071e3]/10 transition-all hover:bg-[#0071e3]/20 flex items-center gap-3">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10" />
             <polygon points="10 8 16 12 10 16 10 8" />
           </svg>
-          Inference
+          Change Mode
         </a>
       </div>
     </div>
@@ -612,30 +622,31 @@
       <div class="aos inline-flex items-center gap-2 mb-6 sm:mb-8 px-3 py-2 sm:px-4 rounded-full"
         style="background:rgba(0,113,227,0.12);border:1px solid rgba(0,113,227,0.28)">
         <span class="w-2 h-2 rounded-full bg-blue-400 pulse-ring"></span>
-        <span class="text-[10px] sm:text-xs font-medium text-blue-300 tracking-wide">Final Year Project — B.E. Computer
-          Science</span>
+        <span class="text-[10px] sm:text-xs font-medium text-blue-300 tracking-wide">A Final Year Project — B.E. Computer Science and Engineering</span>
       </div>
 
       <!-- Main Title -->
       <h1 class="hero-title mb-4 sm:mb-6">
         <span class="shimmer-text">Indian Sign</span><br />
-        <span style="color:rgba(255,255,255,0.92)">Language</span><br />
-        <span style="color:rgba(255,255,255,0.55)">Recognition.</span>
+        <span class="font-Syne" style="color:rgba(255,255,255,0.92)">Language</span><br />
+        <span class="font-Syne" style="color:rgba(255,255,255,0.55)">Recognition.</span>
       </h1>
 
       <p
         class="text-base sm:text-lg md:text-xl text-white/50 max-w-2xl mx-auto leading-relaxed font-light mb-8 sm:mb-10 px-2 aos aos-d1">
         A real-time deep learning system that bridges the communication gap between the deaf and hearing communities —
-        powered by LSTM, MediaPipe, and PyTorch.
+        powered by LSTM, Random Forest, MediaPipe, and PyTorch.
       </p>
 
       <!-- Badges -->
       <div class="flex flex-wrap items-center justify-center gap-2 mb-10 sm:mb-12 aos aos-d2">
         <span class="tech-badge">🧠 LSTM Network</span>
+        <span class="tech-badge">🌲 Random Forest</span>
         <span class="tech-badge">🤲 MediaPipe</span>
         <span class="tech-badge">⚡ PyTorch</span>
         <span class="tech-badge">📷 Real-Time CV</span>
-        <span class="tech-badge">🇮🇳 49 ISL Gestures</span>
+        <span class="tech-badge">🇮 49 ISL Gestures</span>
+        <span class="tech-badge">🔤 36 Letters/Numbers</span>
       </div>
 
       <!-- CTAs -->
@@ -659,23 +670,23 @@
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-3xl mx-auto aos aos-d4">
         <div class="glass-card text-center px-2 sm:px-4 py-3 sm:py-5">
           <div class="text-2xl sm:text-3xl font-display font-800 text-white mb-1"
-            style="font-family:'Syne',sans-serif;font-weight:800">49</div>
+            style="font-family:'Anta',sans-serif;font-weight:800">49</div>
           <div class="text-[10px] sm:text-xs text-white/40 font-medium">ISL Gestures</div>
         </div>
         <div class="glass-card text-center px-2 sm:px-4 py-3 sm:py-5">
           <div class="text-2xl sm:text-3xl font-display font-800 text-white mb-1"
-            style="font-family:'Syne',sans-serif;font-weight:800">98.4%</div>
+            style="font-family:'Anta',sans-serif;font-weight:800">36</div>
+          <div class="text-[10px] sm:text-xs text-white/40 font-medium">Letters & Numbers</div>
+        </div>
+        <div class="glass-card text-center px-2 sm:px-4 py-3 sm:py-5">
+          <div class="text-2xl sm:text-3xl font-display font-800 text-white mb-1"
+            style="font-family:'Anta',sans-serif;font-weight:800">98.48%</div>
           <div class="text-[10px] sm:text-xs text-white/40 font-medium">Accuracy</div>
         </div>
         <div class="glass-card text-center px-2 sm:px-4 py-3 sm:py-5">
           <div class="text-2xl sm:text-3xl font-display font-800 text-white mb-1"
-            style="font-family:'Syne',sans-serif;font-weight:800">30fps</div>
+            style="font-family:'Anta',sans-serif;font-weight:800">30fps</div>
           <div class="text-[10px] sm:text-xs text-white/40 font-medium">Real-Time Speed</div>
-        </div>
-        <div class="glass-card text-center px-2 sm:px-4 py-3 sm:py-5">
-          <div class="text-2xl sm:text-3xl font-display font-800 text-white mb-1"
-            style="font-family:'Syne',sans-serif;font-weight:800">258</div>
-          <div class="text-[10px] sm:text-xs text-white/40 font-medium">Keypoints / Frame</div>
         </div>
       </div>
 
@@ -712,19 +723,20 @@
           <p class="text-white/50 text-base sm:text-lg leading-relaxed mb-8 sm:mb-10 aos aos-d2">
             Existing solutions require trained interpreters who are scarce and expensive. <strong
               class="text-white/80">SignSense AI</strong> provides an always-available, real-time,
-            machine-learning-based bridge — using only a standard webcam.
+            machine-learning-based bridge — using only a standard webcam. Our system supports both continuous gesture
+            recognition (LSTM) and finger-spelling (Random Forest).
           </p>
 
           <!-- Mini stats -->
           <div class="grid grid-cols-2 gap-3 sm:gap-4 aos aos-d3">
             <div class="glass-card p-4 sm:p-5">
               <div class="text-xl sm:text-2xl font-display font-700 text-blue-400 mb-1"
-                style="font-family:'Syne',sans-serif;font-weight:700">63M+</div>
+                style="font-family:'Anta',sans-serif;font-weight:700">63M+</div>
               <div class="text-xs sm:text-sm text-white/40">People with hearing impairment in India</div>
             </div>
             <div class="glass-card p-4 sm:p-5">
               <div class="text-xl sm:text-2xl font-display font-700 text-blue-400 mb-1"
-                style="font-family:'Syne',sans-serif;font-weight:700">250+</div>
+                style="font-family:'Anta',sans-serif;font-weight:700">250+</div>
               <div class="text-xs sm:text-sm text-white/40">Certified sign language interpreters nationwide</div>
             </div>
           </div>
@@ -740,7 +752,7 @@
             <div class="relative z-10">
               <div class="text-4xl sm:text-5xl mb-4 sm:mb-5">🤲</div>
               <h3 class="text-lg sm:text-xl font-display font-600 text-white mb-3"
-                style="font-family:'Syne',sans-serif;font-weight:600">Indian Sign Language</h3>
+                style="font-family:'Anta',sans-serif;font-weight:600">Indian Sign Language</h3>
               <p class="text-white/45 text-xs sm:text-sm leading-relaxed mb-5 sm:mb-6">
                 ISL is a complete, natural language with its own grammar, syntax, and vocabulary — distinct from British
                 or American Sign Language.
@@ -785,93 +797,166 @@
         <h2 class="section-title aos aos-d1">From webcam frame to predicted gesture — in milliseconds.</h2>
       </div>
 
-      <!-- Pipeline Steps - Responsive grid that wraps on mobile -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-start aos aos-d2">
-        <div class="glass-card-hover p-5 sm:p-6 text-center">
-          <div
-            class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
-            style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">📷</div>
-          <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 01</div>
-          <h4 class="text-sm font-semibold text-white mb-2">Video Capture</h4>
-          <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">OpenCV captures live webcam frames at 30 fps
-            and mirrors the image</p>
+      <!-- Dynamic Mode Pipeline -->
+      <div class="mb-16">
+        <h3 class="text-xl sm:text-2xl font-display font-bold text-center mb-8 aos"
+          style="font-family:'Anta',sans-serif">
+          <span class="text-blue-400">Dynamic Mode</span> — Continuous Gesture Recognition (LSTM)
+        </h3>
+
+        <!-- Pipeline Steps - Responsive grid that wraps on mobile -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-start aos aos-d2">
+          <div class="glass-card-hover p-5 sm:p-6 text-center">
+            <div
+              class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+              style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">📷</div>
+            <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 01</div>
+            <h4 class="text-sm font-semibold text-white mb-2">Video Capture</h4>
+            <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">OpenCV captures live webcam frames at 30 fps
+              and mirrors the image</p>
+          </div>
+
+          <!-- Arrow hidden on mobile -->
+          <div class="hidden md:flex items-center justify-center pt-12">
+            <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
+              <path d="M0 8h28M22 2l8 6-8 6" stroke="rgba(0,113,227,0.5)" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </div>
+
+          <div class="glass-card-hover p-5 sm:p-6 text-center">
+            <div
+              class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+              style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">🦴</div>
+            <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 02</div>
+            <h4 class="text-sm font-semibold text-white mb-2">Keypoint Extraction</h4>
+            <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">MediaPipe extracts 33 pose + 21+21 hand
+              landmarks = 258D feature vector</p>
+          </div>
+
+          <div class="hidden md:flex items-center justify-center pt-12">
+            <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
+              <path d="M0 8h28M22 2l8 6-8 6" stroke="rgba(0,113,227,0.5)" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </div>
+
+          <div class="glass-card-hover p-5 sm:p-6 text-center">
+            <div
+              class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+              style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">🔧</div>
+            <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 03</div>
+            <h4 class="text-sm font-semibold text-white mb-2">Normalization</h4>
+            <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">Spatial normalization relative to hip center
+              &
+              shoulder scale removes camera bias</p>
+          </div>
         </div>
 
-        <!-- Arrow hidden on mobile -->
-        <div class="hidden md:flex items-center justify-center pt-12">
-          <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
-            <path d="M0 8h28M22 2l8 6-8 6" stroke="rgba(0,113,227,0.5)" stroke-width="2" stroke-linecap="round" />
-          </svg>
-        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mt-4 items-start aos aos-d3">
+          <div class="glass-card-hover p-5 sm:p-6 text-center">
+            <div
+              class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+              style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">📈</div>
+            <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 04</div>
+            <h4 class="text-sm font-semibold text-white mb-2">EMA Smoothing</h4>
+            <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">Exponential Moving Average filter (α=0.5)
+              reduces landmark jitter between frames</p>
+          </div>
 
-        <div class="glass-card-hover p-5 sm:p-6 text-center">
-          <div
-            class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
-            style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">🦴</div>
-          <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 02</div>
-          <h4 class="text-sm font-semibold text-white mb-2">Keypoint Extraction</h4>
-          <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">MediaPipe extracts 33 pose + 21+21 hand
-            landmarks = 258D feature vector</p>
-        </div>
+          <div class="hidden md:flex items-center justify-center pt-12">
+            <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
+              <path d="M0 8h28M22 2l8 6-8 6" stroke="rgba(0,113,227,0.5)" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </div>
 
-        <div class="hidden md:flex items-center justify-center pt-12">
-          <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
-            <path d="M0 8h28M22 2l8 6-8 6" stroke="rgba(0,113,227,0.5)" stroke-width="2" stroke-linecap="round" />
-          </svg>
-        </div>
+          <div class="glass-card-hover p-5 sm:p-6 text-center">
+            <div
+              class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+              style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">🧠</div>
+            <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 05</div>
+            <h4 class="text-sm font-semibold text-white mb-2">LSTM Inference</h4>
+            <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">30-frame sequence fed into 2-layer LSTM →
+              Softmax over 49 gesture classes</p>
+          </div>
 
-        <div class="glass-card-hover p-5 sm:p-6 text-center">
-          <div
-            class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
-            style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">🔧</div>
-          <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 03</div>
-          <h4 class="text-sm font-semibold text-white mb-2">Normalization</h4>
-          <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">Spatial normalization relative to hip center &
-            shoulder scale removes camera bias</p>
+          <div class="hidden md:flex items-center justify-center pt-12">
+            <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
+              <path d="M0 8h28M22 2l8 6-8 6" stroke="rgba(0,113,227,0.5)" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </div>
+
+          <div class="glass-card-hover p-5 sm:p-6 text-center">
+            <div
+              class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+              style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">🗳️</div>
+            <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 06</div>
+            <h4 class="text-sm font-semibold text-white mb-2">Voting Buffer</h4>
+            <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">20-frame majority voting (12/20 threshold)
+              ensures stable, flicker-free UI output</p>
+          </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mt-4 items-start aos aos-d3">
-        <div class="glass-card-hover p-5 sm:p-6 text-center">
-          <div
-            class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
-            style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">📈</div>
-          <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 04</div>
-          <h4 class="text-sm font-semibold text-white mb-2">EMA Smoothing</h4>
-          <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">Exponential Moving Average filter (α=0.5)
-            reduces landmark jitter between frames</p>
-        </div>
+      <!-- Static Mode Pipeline -->
+      <div>
+        <h3 class="text-xl sm:text-2xl font-display font-bold text-center mb-8 aos"
+          style="font-family:'Anta',sans-serif">
+          <span class="text-green-400">Static Mode</span> — Finger-Spelling Recognition (Random Forest)
+        </h3>
 
-        <div class="hidden md:flex items-center justify-center pt-12">
-          <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
-            <path d="M0 8h28M22 2l8 6-8 6" stroke="rgba(0,113,227,0.5)" stroke-width="2" stroke-linecap="round" />
-          </svg>
-        </div>
+        <!-- Pipeline Steps - Responsive grid that wraps on mobile -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 items-start aos aos-d2">
+          <div class="glass-card-hover p-5 sm:p-6 text-center" style="border-color:rgba(34,197,94,0.3)">
+            <div
+              class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+              style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.2)">📷</div>
+            <div class="text-[10px] sm:text-xs font-medium text-green-400 mb-2 tracking-wide">STEP 01</div>
+            <h4 class="text-sm font-semibold text-white mb-2">Frame Capture</h4>
+            <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">Real-time webcam capture at optimized 30 fps
+              with frame mirroring</p>
+          </div>
 
-        <div class="glass-card-hover p-5 sm:p-6 text-center">
-          <div
-            class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
-            style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">🧠</div>
-          <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 05</div>
-          <h4 class="text-sm font-semibold text-white mb-2">LSTM Inference</h4>
-          <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">30-frame sequence fed into 2-layer LSTM →
-            Softmax over 49 gesture classes</p>
-        </div>
+          <div class="hidden md:flex items-center justify-center pt-12">
+            <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
+              <path d="M0 8h28M22 2l8 6-8 6" stroke="rgba(34,197,94,0.5)" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </div>
 
-        <div class="hidden md:flex items-center justify-center pt-12">
-          <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
-            <path d="M0 8h28M22 2l8 6-8 6" stroke="rgba(0,113,227,0.5)" stroke-width="2" stroke-linecap="round" />
-          </svg>
-        </div>
+          <div class="glass-card-hover p-5 sm:p-6 text-center" style="border-color:rgba(34,197,94,0.3)">
+            <div
+              class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+              style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.2)">🦴</div>
+            <div class="text-[10px] sm:text-xs font-medium text-green-400 mb-2 tracking-wide">STEP 02</div>
+            <h4 class="text-sm font-semibold text-white mb-2">Holistic Detection</h4>
+            <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">MediaPipe Holistic extracts pose + both
+              hands
+              = 263D feature vector</p>
+          </div>
 
-        <div class="glass-card-hover p-5 sm:p-6 text-center">
-          <div
-            class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
-            style="background:rgba(0,113,227,0.15);border:1px solid rgba(0,113,227,0.2)">🗳️</div>
-          <div class="text-[10px] sm:text-xs font-medium text-blue-400 mb-2 tracking-wide">STEP 06</div>
-          <h4 class="text-sm font-semibold text-white mb-2">Voting Buffer</h4>
-          <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">20-frame majority voting (12/20 threshold)
-            ensures stable, flicker-free UI output</p>
+          <div class="glass-card-hover p-5 sm:p-6 text-center" style="border-color:rgba(34,197,94,0.3)">
+            <div
+              class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+              style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.2)">🌲</div>
+            <div class="text-[10px] sm:text-xs font-medium text-green-400 mb-2 tracking-wide">STEP 03</div>
+            <h4 class="text-sm font-semibold text-white mb-2">Random Forest</h4>
+            <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">Ensemble of decision trees predicts from 36
+              classes (A-Z, 0-9)</p>
+          </div>
+
+          <div class="hidden md:flex items-center justify-center pt-12">
+            <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
+              <path d="M0 8h28M22 2l8 6-8 6" stroke="rgba(34,197,94,0.5)" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </div>
+
+          <div class="glass-card-hover p-5 sm:p-6 text-center" style="border-color:rgba(34,197,94,0.3)">
+            <div
+              class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center text-xl sm:text-2xl mx-auto mb-3 sm:mb-4"
+              style="background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.2)">⚡</div>
+            <div class="text-[10px] sm:text-xs font-medium text-green-400 mb-2 tracking-wide">STEP 04</div>
+            <h4 class="text-sm font-semibold text-white mb-2">Turbo Voting</h4>
+            <p class="text-[11px] sm:text-xs text-white/40 leading-relaxed">8-frame buffer with 4-vote threshold for
+              ultra-fast letter detection (~133ms)</p>
+          </div>
         </div>
       </div>
     </div>
@@ -888,7 +973,7 @@
     <div class="max-w-7xl mx-auto relative z-10">
       <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
         <p class="eyebrow mb-3 sm:mb-4 aos">Live Demonstration</p>
-        <h2 class="section-title aos aos-d1">See SignSense AI in action.</h2>
+        <h2 class="section-title aos aos-d1">See SignSense in action.</h2>
         <p class="text-white/45 mt-3 sm:mt-4 text-sm sm:text-base px-2 aos aos-d2">The system processes video in
           real-time, overlays skeletal landmarks, and displays the predicted gesture with confidence score.</p>
       </div>
@@ -981,9 +1066,9 @@
             Locally</h4>
           <div class="code-block text-[11px] sm:text-sm">
             <span class="code-comment"># Install dependencies</span><br />
-            pip install opencv-python mediapipe torch numpy<br /><br />
+            pip install opencv-python mediapipe torch numpy scikit-learn joblib<br /><br />
             <span class="code-comment"># Run the recognition system</span><br />
-            python <span class="code-str">RealTI_N1.py</span><br /><br />
+            python <span class="code-str">app.py</span><br /><br />
             <span class="code-comment"># Press 'q' to quit the webcam window</span>
           </div>
         </div>
@@ -1038,13 +1123,31 @@
           <p class="text-white/45 text-xs sm:text-sm leading-relaxed">Automatically runs on CUDA GPU if available, else
             falls back to CPU — ensuring compatibility across all hardware configurations.</p>
         </div>
+        <div class="glass-card-hover p-5 sm:p-7 aos">
+          <div class="feature-icon" style="background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.22)">🌲</div>
+          <h3 class="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Random Forest Ensemble</h3>
+          <p class="text-white/45 text-xs sm:text-sm leading-relaxed">Multiple decision trees vote for robust letter
+            classification with built-in feature importance analysis.</p>
+        </div>
+        <div class="glass-card-hover p-5 sm:p-7 aos aos-d1">
+          <div class="feature-icon" style="background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.22)">⚡</div>
+          <h3 class="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">Turbo Mode Detection</h3>
+          <p class="text-white/45 text-xs sm:text-sm leading-relaxed">8-frame buffer with 4-vote threshold enables
+            ultra-fast letter recognition in ~133ms for responsive finger-spelling.</p>
+        </div>
+        <div class="glass-card-hover p-5 sm:p-7 aos aos-d2">
+          <div class="feature-icon" style="background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.22)">🔤</div>
+          <h3 class="text-base sm:text-lg font-semibold text-white mb-2 sm:mb-3">36-Class Recognition</h3>
+          <p class="text-white/45 text-xs sm:text-sm leading-relaxed">Comprehensive alphabet and number recognition
+            (A-Z, 0-9) for complete finger-spelling capability.</p>
+        </div>
       </div>
     </div>
   </section>
 
   <div class="section-divider"></div>
 
-  <!-- GESTURE LIBRARY (Full content preserved)  -->
+  <!-- GESTURE LIBRARY -->
   <section id="gestures" class="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
     <div class="glow-orb"
       style="width:min(400px,60vw);height:min(400px,60vw);background:rgba(0,113,227,0.10);top:50%;right:-100px;transform:translateY(-50%)">
@@ -1053,9 +1156,12 @@
     <div class="max-w-7xl mx-auto relative z-10">
       <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
         <p class="eyebrow mb-3 sm:mb-4 aos">Gesture Library</p>
-        <h2 class="section-title aos aos-d1">49 Indian Sign Language gestures recognized in real-time.</h2>
+        <h2 class="section-title aos aos-d1">Indian Sign Language gestures recognized in real-time.</h2>
       </div>
 
+      <h3 class="text-xl sm:text-2xl font-display font-bold text-center mb-8 aos" style="font-family:'Anta',sans-serif">
+        <span class="text-blue-400">Dynamic Mode</span> — Continuous Gesture of ISL Words
+      </h3>
       <div class="space-y-5 sm:space-y-8 aos aos-d2">
         <div class="glass-card p-5 sm:p-6">
           <div class="flex items-center gap-3 mb-3 sm:mb-4 flex-wrap"><span class="text-base sm:text-lg">👋</span><span
@@ -1103,12 +1209,68 @@
               class="gesture-tag">it</span><span class="gesture-tag">difficult</span></div>
         </div>
       </div>
+
+      <!-- Static Mode - Letters & Numbers -->
+      <div class="mt-12 sm:mt-16">
+        <h3 class="text-xl sm:text-2xl font-display font-bold text-center mb-8 aos"
+          style="font-family:'Anta',sans-serif">
+          <span class="text-green-400">Static Mode</span> — Finger-Spelling Alphabet & Numbers
+        </h3>
+        <div class="glass-card p-5 sm:p-6 aos aos-d3">
+          <div class="flex items-center gap-3 mb-3 sm:mb-4 flex-wrap"><span class="text-base sm:text-lg">🔤</span><span
+              class="text-xs sm:text-sm font-semibold text-white/70">Alphabet (A-Z)</span></div>
+          <div class="flex flex-wrap gap-1.5 sm:gap-2">
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">A</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">B</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">C</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">D</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">E</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">F</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">G</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">H</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">I</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">J</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">K</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">L</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">M</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">N</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">O</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">P</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">Q</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">R</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">S</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">T</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">U</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">V</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">W</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">X</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">Y</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">Z</span>
+          </div>
+        </div>
+        <div class="glass-card p-5 sm:p-6 mt-4 aos aos-d4">
+          <div class="flex items-center gap-3 mb-3 sm:mb-4 flex-wrap"><span class="text-base sm:text-lg">🔢</span><span
+              class="text-xs sm:text-sm font-semibold text-white/70">Numbers (0-9)</span></div>
+          <div class="flex flex-wrap gap-1.5 sm:gap-2">
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">0</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">1</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">2</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">3</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">4</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">5</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">6</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">7</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">8</span>
+            <span class="gesture-tag" style="border-color:rgba(34,197,94,0.3);background:rgba(34,197,94,0.06)">9</span>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
   <div class="section-divider"></div>
 
-  <!-- ARCHITECTURE (Full content preserved - shortened for length)  -->
+  <!-- ARCHITECTURE -->
   <section id="architecture" class="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
     <div class="glow-orb"
       style="width:min(500px,70vw);height:min(500px,70vw);background:rgba(0,180,255,0.08);top:0;left:-100px"></div>
@@ -1116,12 +1278,18 @@
     <div class="max-w-7xl mx-auto relative z-10">
       <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-20">
         <p class="eyebrow mb-3 sm:mb-4 aos">Model Architecture</p>
-        <h2 class="section-title aos aos-d1">Two-layer LSTM with dropout regularization.</h2>
+        <h2 class="section-title aos aos-d1">Dual-mode architecture for comprehensive sign language recognition.</h2>
       </div>
 
-      <div class="grid md:grid-cols-2 gap-8 lg:gap-10 items-start">
-        <div class="aos overflow-x-auto">
-          <div class="glass-card p-5 sm:p-8 min-w-[280px]">
+      <div class="grid lg:grid-cols-2 gap-8 lg:gap-10">
+
+        <!-- Dynamic Mode Architecture -->
+        <div class="aos">
+          <h3 class="text-lg sm:text-xl font-display font-bold mb-6 text-blue-400"
+            style="font-family:'Anta',sans-serif">
+            Dynamic Mode — LSTM Network
+          </h3>
+          <div class="glass-card p-5 sm:p-8 min-w-[280px] overflow-x-auto">
             <h4 class="text-sm font-semibold text-white/60 uppercase tracking-wide mb-5 sm:mb-6">Neural Network Layers
             </h4>
             <div class="space-y-2 sm:space-y-3">
@@ -1191,11 +1359,9 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="space-y-4 sm:space-y-5 aos aos-d2">
-          <div class="glass-card p-5 sm:p-6 overflow-x-auto">
-            <h4 class="text-sm font-semibold text-white/60 uppercase tracking-wide mb-4">Model Hyperparameters</h4>
+          <div class="glass-card p-5 sm:p-6 mt-6 overflow-x-auto">
+            <h4 class="text-sm font-semibold text-white/60 uppercase tracking-wide mb-4">LSTM Hyperparameters</h4>
             <div class="space-y-2 sm:space-y-3 min-w-[200px]">
               <div class="flex justify-between items-center py-2 border-b flex-wrap gap-2"
                 style="border-color:rgba(255,255,255,0.06)"><span class="text-sm text-white/50">Input
@@ -1220,33 +1386,116 @@
                   class="text-sm font-mono text-white">85%</span></div>
             </div>
           </div>
+        </div>
 
-          <div class="glass-card p-5 sm:p-6 overflow-x-auto">
-            <h4 class="text-sm font-semibold text-white/60 uppercase tracking-wide mb-4">Model Definition</h4>
-            <div class="code-block text-[10px] sm:text-xs"><span class="code-kw">class</span> <span
-                class="code-cls">SignLanguageLSTM</span>(nn.Module):<br />&nbsp;&nbsp;<span class="code-kw">def</span>
-              <span class="code-fn">__init__</span>(self,<br />&nbsp;&nbsp;&nbsp;&nbsp;input_size=<span
-                class="code-num">258</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;hidden_size=<span
-                class="code-num">128</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;num_layers=<span
-                class="code-num">2</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;num_classes=<span
-                class="code-num">49</span>,<br />&nbsp;&nbsp;&nbsp;&nbsp;dropout=<span
-                class="code-num">0.5</span>):<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;self.lstm = nn.<span
-                class="code-fn">LSTM</span>(<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;input_size,
-              hidden_size,<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;num_layers, batch_first=<span
-                class="code-kw">True</span>)<br />&nbsp;&nbsp;&nbsp;&nbsp;self.fc = nn.<span
-                class="code-fn">Linear</span>(<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hidden_size, num_classes)
+        <!-- Static Mode Architecture -->
+        <div class="aos aos-d1">
+          <h3 class="text-lg sm:text-xl font-display font-bold mb-6 text-green-400"
+            style="font-family:'Anta',sans-serif">
+            Static Mode — Random Forest
+          </h3>
+          <div class="glass-card p-5 sm:p-8 min-w-[280px] overflow-x-auto" style="border-color:rgba(34,197,94,0.3)">
+            <h4 class="text-sm font-semibold text-white/60 uppercase tracking-wide mb-5 sm:mb-6">Ensemble Model
+              Structure
+            </h4>
+            <div class="space-y-2 sm:space-y-3">
+              <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+                <div class="w-24 sm:w-32 text-right text-xs text-white/40 flex-shrink-0">Input</div>
+                <div class="flex-1 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm font-mono text-white/80"
+                  style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.2)">263 features<div
+                    class="text-[9px] sm:text-xs text-white/35 mt-0.5">Pose + Hand landmarks</div>
+                </div>
+              </div>
+              <div class="flex justify-center"><svg height="16" width="16" viewBox="0 0 20 20">
+                  <path d="M10 2v16M4 12l6 6 6-6" stroke="#22c55e" stroke-width="1.5" fill="none"
+                    stroke-linecap="round" />
+                </svg></div>
+              <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+                <div class="w-24 sm:w-32 text-right text-xs text-white/40 flex-shrink-0">Decision Trees</div>
+                <div class="flex-1 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm font-mono text-green-300"
+                  style="background:rgba(34,197,94,0.18);border:1px solid rgba(34,197,94,0.35)">n_estimators = 100<div
+                    class="text-[9px] sm:text-xs text-white/35 mt-0.5">Ensemble of trees</div>
+                </div>
+              </div>
+              <div class="flex justify-center"><svg height="16" width="16" viewBox="0 0 20 20">
+                  <path d="M10 2v16M4 12l6 6 6-6" stroke="#22c55e" stroke-width="1.5" fill="none"
+                    stroke-linecap="round" />
+                </svg></div>
+              <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+                <div class="w-24 sm:w-32 text-right text-xs text-white/40 flex-shrink-0">Max Depth</div>
+                <div class="flex-1 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm font-mono text-green-300"
+                  style="background:rgba(34,197,94,0.18);border:1px solid rgba(34,197,94,0.35)">None (unlimited)<div
+                    class="text-[9px] sm:text-xs text-white/35 mt-0.5">Full tree growth</div>
+                </div>
+              </div>
+              <div class="flex justify-center"><svg height="16" width="16" viewBox="0 0 20 20">
+                  <path d="M10 2v16M4 12l6 6 6-6" stroke="#22c55e" stroke-width="1.5" fill="none"
+                    stroke-linecap="round" />
+                </svg></div>
+              <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+                <div class="w-24 sm:w-32 text-right text-xs text-white/40 flex-shrink-0">Voting</div>
+                <div
+                  class="flex-1 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm font-mono text-yellow-300/80"
+                  style="background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.15)">Majority vote<div
+                    class="text-[9px] sm:text-xs text-white/35 mt-0.5">All trees vote</div>
+                </div>
+              </div>
+              <div class="flex justify-center"><svg height="16" width="16" viewBox="0 0 20 20">
+                  <path d="M10 2v16M4 12l6 6 6-6" stroke="#22c55e" stroke-width="1.5" fill="none"
+                    stroke-linecap="round" />
+                </svg></div>
+              <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+                <div class="w-24 sm:w-32 text-right text-xs text-white/40 flex-shrink-0">Output</div>
+                <div class="flex-1 rounded-xl px-3 sm:px-4 py-2 sm:py-3 text-[11px] sm:text-sm font-mono text-green-300"
+                  style="background:rgba(34,197,94,0.14);border:1px solid rgba(34,197,94,0.3)">36 classes
+                  <div class="text-[9px] sm:text-xs text-white/35 mt-0.5">A-Z + 0-9</div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="glass-card p-5 sm:p-6">
-            <h4 class="text-sm font-semibold text-white/60 uppercase tracking-wide mb-4">Technology Stack</h4>
-            <div class="flex flex-wrap gap-1.5 sm:gap-2"><span class="tech-badge text-[10px] sm:text-xs">🐍 Python
-                3.10</span><span class="tech-badge text-[10px] sm:text-xs">🔥 PyTorch</span><span
-                class="tech-badge text-[10px] sm:text-xs">🤲 MediaPipe</span><span
-                class="tech-badge text-[10px] sm:text-xs">📷 OpenCV</span><span
-                class="tech-badge text-[10px] sm:text-xs">🔢 NumPy</span><span
-                class="tech-badge text-[10px] sm:text-xs">⚡ CUDA</span></div>
+          <div class="glass-card p-5 sm:p-6 mt-6 overflow-x-auto" style="border-color:rgba(34,197,94,0.3)">
+            <h4 class="text-sm font-semibold text-white/60 uppercase tracking-wide mb-4">Random Forest Parameters</h4>
+            <div class="space-y-2 sm:space-y-3 min-w-[200px]">
+              <div class="flex justify-between items-center py-2 border-b flex-wrap gap-2"
+                style="border-color:rgba(255,255,255,0.06)"><span class="text-sm text-white/50">Input
+                  Features</span><span class="text-sm font-mono text-white">263</span></div>
+              <div class="flex justify-between items-center py-2 border-b flex-wrap gap-2"
+                style="border-color:rgba(255,255,255,0.06)"><span class="text-sm text-white/50">n_estimators</span><span
+                  class="text-sm font-mono text-white">100</span></div>
+              <div class="flex justify-between items-center py-2 border-b flex-wrap gap-2"
+                style="border-color:rgba(255,255,255,0.06)"><span class="text-sm text-white/50">max_depth</span><span
+                  class="text-sm font-mono text-white">None</span></div>
+              <div class="flex justify-between items-center py-2 border-b flex-wrap gap-2"
+                style="border-color:rgba(255,255,255,0.06)"><span
+                  class="text-sm text-white/50">min_samples_split</span><span
+                  class="text-sm font-mono text-white">2</span></div>
+              <div class="flex justify-between items-center py-2 border-b flex-wrap gap-2"
+                style="border-color:rgba(255,255,255,0.06)"><span class="text-sm text-white/50">Output
+                  Classes</span><span class="text-sm font-mono text-white">36</span></div>
+              <div class="flex justify-between items-center py-2 border-b flex-wrap gap-2"
+                style="border-color:rgba(255,255,255,0.06)"><span class="text-sm text-white/50">Buffer Size</span><span
+                  class="text-sm font-mono text-white">8 frames</span></div>
+              <div class="flex justify-between items-center py-2 flex-wrap gap-2"><span
+                  class="text-sm text-white/50">Confidence Threshold</span><span
+                  class="text-sm font-mono text-white">65%</span></div>
+            </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Technology Stack -->
+      <div class="mt-12 glass-card p-5 sm:p-6 aos aos-d2">
+        <h4 class="text-sm font-semibold text-white/60 uppercase tracking-wide mb-4">Technology Stack</h4>
+        <div class="flex flex-wrap gap-1.5 sm:gap-2">
+          <span class="tech-badge text-[10px] sm:text-xs">🐍 Python 3.11.0</span>
+          <span class="tech-badge text-[10px] sm:text-xs">🔥 PyTorch</span>
+          <span class="tech-badge text-[10px] sm:text-xs">🌲 Scikit-learn</span>
+          <span class="tech-badge text-[10px] sm:text-xs">🤲 MediaPipe</span>
+          <span class="tech-badge text-[10px] sm:text-xs">📷 OpenCV</span>
+          <span class="tech-badge text-[10px] sm:text-xs">🔢 NumPy</span>
+          <span class="tech-badge text-[10px] sm:text-xs">💾 Joblib</span>
+          <span class="tech-badge text-[10px] sm:text-xs">⚡ CUDA</span>
         </div>
       </div>
     </div>
@@ -1254,7 +1503,7 @@
 
   <div class="section-divider"></div>
 
-  <!-- PERFORMANCE METRICS (Full content preserved)  -->
+  <!-- PERFORMANCE METRICS -->
   <section class="relative py-20 sm:py-32 px-4 sm:px-6">
     <div class="max-w-7xl mx-auto">
       <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-20">
@@ -1262,9 +1511,13 @@
         <h2 class="section-title aos aos-d1">Measured. Validated. Production-ready.</h2>
       </div>
 
-      <div class="grid md:grid-cols-3 gap-5 sm:gap-6">
+      <div class="grid md:grid-cols-2 gap-6 mb-8">
+
+        <!-- Dynamic Mode Performance -->
         <div class="glass-card p-5 sm:p-7 aos">
-          <h4 class="text-sm font-semibold text-white mb-5">Accuracy by Gesture Category</h4>
+          <h4 class="text-base sm:text-lg font-semibold text-blue-400 mb-5" style="font-family:'Anta',sans-serif">
+            Dynamic Mode (LSTM) — Gesture Recognition
+          </h4>
           <div class="space-y-4">
             <div>
               <div class="flex justify-between text-xs text-white/50 mb-1.5 flex-wrap"><span>Greetings</span><span
@@ -1302,52 +1555,104 @@
               </div>
             </div>
           </div>
-        </div>
-
-        <div class="space-y-4 sm:space-y-5 aos aos-d1">
-          <div class="glass-card p-5 sm:p-6 text-center">
-            <div class="text-3xl sm:text-4xl font-display font-800 mb-2"
-              style="font-family:'Syne',sans-serif;font-weight:800;color:#0071e3">~33ms</div>
-            <div class="text-xs sm:text-sm text-white/45">Inference Latency (GPU)</div>
-          </div>
-          <div class="glass-card p-5 sm:p-6 text-center">
-            <div class="text-3xl sm:text-4xl font-display font-800 mb-2"
-              style="font-family:'Syne',sans-serif;font-weight:800;color:#0071e3">1 sec</div>
-            <div class="text-xs sm:text-sm text-white/45">Prediction Window (30 frames)</div>
-          </div>
-          <div class="glass-card p-5 sm:p-6 text-center">
-            <div class="text-3xl sm:text-4xl font-display font-800 mb-2"
-              style="font-family:'Syne',sans-serif;font-weight:800;color:#0071e3">85%+</div>
-            <div class="text-xs sm:text-sm text-white/45">Overall Validation Accuracy</div>
+          <div class="mt-6 grid grid-cols-2 gap-4">
+            <div class="glass-card p-4 text-center" style="background:rgba(0,113,227,0.08)">
+              <div class="text-2xl sm:text-3xl font-display font-800 mb-1"
+                style="font-family:'Anta',sans-serif;font-weight:800;color:#0071e3">~33ms</div>
+              <div class="text-xs text-white/45">Inference (GPU)</div>
+            </div>
+            <div class="glass-card p-4 text-center" style="background:rgba(0,113,227,0.08)">
+              <div class="text-2xl sm:text-3xl font-display font-800 mb-1"
+                style="font-family:'Anta',sans-serif;font-weight:800;color:#0071e3">1 sec</div>
+              <div class="text-xs text-white/45">30-frame Window</div>
+            </div>
           </div>
         </div>
 
-        <div class="glass-card p-5 sm:p-7 aos aos-d2">
-          <h4 class="text-sm font-semibold text-white mb-5">Design Decisions</h4>
-          <div class="space-y-3 sm:space-y-4">
-            <div class="flex gap-2 sm:gap-3"><span class="text-blue-400 flex-shrink-0 mt-0.5">✓</span>
-              <div>
-                <div class="text-sm font-medium text-white mb-0.5">Sequence-based input</div>
-                <div class="text-xs text-white/40">LSTM over CNN for temporal motion understanding</div>
+        <!-- Static Mode Performance -->
+        <div class="glass-card p-5 sm:p-7 aos aos-d1" style="border-color:rgba(34,197,94,0.3)">
+          <h4 class="text-base sm:text-lg font-semibold text-green-400 mb-5" style="font-family:'Anta',sans-serif">
+            Static Mode (Random Forest) — Finger-Spelling
+          </h4>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-xs text-white/50 mb-1.5 flex-wrap"><span>Alphabet (A-Z)</span><span
+                  class="text-white">96%</span></div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:96%;background:linear-gradient(90deg,#22c55e,#4ade80)"></div>
               </div>
             </div>
-            <div class="flex gap-2 sm:gap-3"><span class="text-blue-400 flex-shrink-0 mt-0.5">✓</span>
-              <div>
-                <div class="text-sm font-medium text-white mb-0.5">Keypoint-based approach</div>
-                <div class="text-xs text-white/40">Lightweight vs pixel-based CNN — works on any hardware</div>
+            <div>
+              <div class="flex justify-between text-xs text-white/50 mb-1.5 flex-wrap"><span>Numbers (0-9)</span><span
+                  class="text-white">94%</span></div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:94%;background:linear-gradient(90deg,#22c55e,#4ade80)"></div>
               </div>
             </div>
-            <div class="flex gap-2 sm:gap-3"><span class="text-blue-400 flex-shrink-0 mt-0.5">✓</span>
-              <div>
-                <div class="text-sm font-medium text-white mb-0.5">Dual-hand + pose fusion</div>
-                <div class="text-xs text-white/40">Body context improves ISL recognition accuracy</div>
+            <div>
+              <div class="flex justify-between text-xs text-white/50 mb-1.5 flex-wrap"><span>Overall
+                  Accuracy</span><span class="text-white">95.2%</span></div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:95.2%;background:linear-gradient(90deg,#22c55e,#4ade80)"></div>
               </div>
             </div>
-            <div class="flex gap-2 sm:gap-3"><span class="text-blue-400 flex-shrink-0 mt-0.5">✓</span>
-              <div>
-                <div class="text-sm font-medium text-white mb-0.5">Multi-stage smoothing</div>
-                <div class="text-xs text-white/40">EMA + voting ensures stable real-world output</div>
-              </div>
+          </div>
+          <div class="mt-6 grid grid-cols-2 gap-4">
+            <div class="glass-card p-4 text-center"
+              style="background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.2)">
+              <div class="text-2xl sm:text-3xl font-display font-800 mb-1"
+                style="font-family:'Anta',sans-serif;font-weight:800;color:#22c55e">~133ms</div>
+              <div class="text-xs text-white/45">8-frame Detection</div>
+            </div>
+            <div class="glass-card p-4 text-center"
+              style="background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.2)">
+              <div class="text-2xl sm:text-3xl font-display font-800 mb-1"
+                style="font-family:'Anta',sans-serif;font-weight:800;color:#22c55e">4/8</div>
+              <div class="text-xs text-white/45">Vote Threshold</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Design Decisions -->
+      <div class="glass-card p-5 sm:p-7 aos aos-d2">
+        <h4 class="text-sm font-semibold text-white mb-5">Design Decisions</h4>
+        <div class="space-y-3 sm:space-y-4">
+          <div class="flex gap-2 sm:gap-3"><span class="text-blue-400 flex-shrink-0 mt-0.5">✓</span>
+            <div>
+              <div class="text-sm font-medium text-white mb-0.5">Dual-mode architecture</div>
+              <div class="text-xs text-white/40">LSTM for continuous gestures + Random Forest for finger-spelling
+                provides comprehensive coverage</div>
+            </div>
+          </div>
+          <div class="flex gap-2 sm:gap-3"><span class="text-blue-400 flex-shrink-0 mt-0.5">✓</span>
+            <div>
+              <div class="text-sm font-medium text-white mb-0.5">Sequence-based input (LSTM)</div>
+              <div class="text-xs text-white/40">Temporal understanding of gesture motion over 30 frames</div>
+            </div>
+          </div>
+          <div class="flex gap-2 sm:gap-3"><span class="text-green-400 flex-shrink-0 mt-0.5">✓</span>
+            <div>
+              <div class="text-sm font-medium text-white mb-0.5">Keypoint-based approach</div>
+              <div class="text-xs text-white/40">Lightweight vs pixel-based CNN — works on any hardware</div>
+            </div>
+          </div>
+          <div class="flex gap-2 sm:gap-3"><span class="text-blue-400 flex-shrink-0 mt-0.5">✓</span>
+            <div>
+              <div class="text-sm font-medium text-white mb-0.5">Dual-hand + pose fusion</div>
+              <div class="text-xs text-white/40">Body context improves ISL recognition accuracy</div>
+            </div>
+          </div>
+          <div class="flex gap-2 sm:gap-3"><span class="text-green-400 flex-shrink-0 mt-0.5">✓</span>
+            <div>
+              <div class="text-sm font-medium text-white mb-0.5">Ensemble voting (Random Forest)</div>
+              <div class="text-xs text-white/40">100 decision trees provide robust letter classification</div>
+            </div>
+          </div>
+          <div class="flex gap-2 sm:gap-3"><span class="text-blue-400 flex-shrink-0 mt-0.5">✓</span>
+            <div>
+              <div class="text-sm font-medium text-white mb-0.5">Multi-stage smoothing</div>
+              <div class="text-xs text-white/40">EMA + voting ensures stable real-world output</div>
             </div>
           </div>
         </div>
@@ -1357,7 +1662,7 @@
 
   <div class="section-divider"></div>
 
-  <!-- TEAM (Full content preserved - shortened for length)  -->
+  <!-- TEAM -->
   <section id="team" class="relative py-20 sm:py-32 px-4 sm:px-6 overflow-hidden">
     <div class="glow-orb"
       style="width:min(500px,70vw);height:min(500px,70vw);background:rgba(0,113,227,0.10);bottom:-100px;left:50%;transform:translateX(-50%)">
@@ -1440,8 +1745,10 @@
         <div class="glass-card p-6 sm:p-8">
           <div class="text-2xl sm:text-3xl mb-3 sm:mb-4">🎓</div>
           <h4 class="font-display font-700 text-white text-base sm:text-lg mb-2"
-            style="font-family:'Syne',sans-serif;font-weight:700">Department of Computer Science & Engineering</h4>
-          <p class="text-white/40 text-xs sm:text-sm">Bachelor of Engineering — Final Year Project, 2026</p>
+            style="font-family:'Anta',sans-serif;font-weight:700">B.E. Computer Science and Engineering — A Final Year Project, 2026
+          </h4>
+          <p class="text-white/40 text-xs sm:text-sm">Department of Computer Science & Engineering,</p>
+          <p class="text-white/40 text-xs sm:text-sm">Annamalai University.</p>
           <div class="section-divider my-4 sm:my-5"></div>
           <p class="text-white/30 text-[10px] sm:text-xs">Guided by <span class="text-white/50">Dr. R. PRIYA</span>,
             Professor</p>
@@ -1452,7 +1759,7 @@
 
   <div class="section-divider"></div>
 
-  <!-- FOOTER  -->
+  <!-- FOOTER -->
   <footer class="py-12 sm:py-16 px-4 sm:px-6">
     <div class="max-w-7xl mx-auto">
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 mb-10 sm:mb-12">
@@ -1463,23 +1770,31 @@
                 fill="none" stroke="white" stroke-width="2.5">
                 <path
                   d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-              </svg></div><span style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px">RTSLR</span>
+              </svg></div><span style="font-family:'Anta',sans-serif;font-weight:700;font-size:14px">RTSLR</span>
           </div>
           <p class="text-xs sm:text-sm text-white/35 leading-relaxed">Real-time Indian Sign Language recognition powered
-            by deep learning. A final year B.E. project.</p>
+            by deep learning. A final year B.E. Computer Science and Engineering project.</p>
         </div>
 
         <div>
           <div class="text-xs font-semibold text-white/30 uppercase tracking-wider mb-4">Navigation</div>
-          <div class="space-y-2"><a href="#about"
-              class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">About the Project</a><a
+          <div class="space-y-2">
+            <a href="#about"
+              class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">About the Project</a>
+              <a
               href="#how-it-works" class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">How
-              It Works</a><a href="#features"
-              class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Features</a><a
+              It Works</a>
+              <a href="#features"
+              class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Features</a>
+              <a
               href="#gestures" class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Gesture
-              Library</a><a href="#architecture"
-              class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Model Architecture</a><a
+              Library</a>
+              <a href="#architecture"
+              class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Model Architecture</a>
+              <a
               href="#team" class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Team</a>
+              <a
+              href="/change-mode" class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Change Mode</a>
           </div>
         </div>
 
@@ -1491,13 +1806,15 @@
               class="tech-badge text-[10px] sm:text-xs">MediaPipe</span><span
               class="tech-badge text-[10px] sm:text-xs">OpenCV</span><span
               class="tech-badge text-[10px] sm:text-xs">LSTM</span><span
+              class="tech-badge text-[10px] sm:text-xs">Random Forest</span><span
               class="tech-badge text-[10px] sm:text-xs">NumPy</span></div>
           <div class="mt-5 p-3 sm:p-4 rounded-2xl text-xs sm:text-sm text-white/50"
             style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08)">
             <div class="flex items-center gap-2 mb-1"><span
                 class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-400"></span><span
                 class="text-[10px] sm:text-xs text-white/40">Model Status</span></div>
-            <div class="text-[9px] sm:text-xs font-mono text-white/60 break-all">sign_lstm_best.pt — 49 classes</div>
+            <div class="text-[9px] sm:text-xs font-mono text-white/60 break-all">sign_lstm_best.pt — 49
+              classes<br />isl_alphabet_model.pkl — 36 classes</div>
           </div>
         </div>
       </div>
@@ -1505,7 +1822,7 @@
       <div class="section-divider mb-5 sm:mb-6"></div>
       <div
         class="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-[10px] sm:text-xs text-white/25">
-        <span>© 2025 RTSLR — Final Year Project. All rights reserved.</span><span>Built with ❤️ for the deaf community
+        <span>© 2025 RTSLR — A Final Year Project.</span><span>Built with ❤️ for the deaf community
           of India</span>
       </div>
     </div>
