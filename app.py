@@ -93,7 +93,7 @@ DYNAMIC_BUFFER_SIZE = 20
 STATIC_MODEL_PATH = 'isl_alphabet_model.pkl'
 STATIC_VOTING_BUFFER_SIZE = 8
 STATIC_MIN_VOTES = 4
-STATIC_CONFIDENCE_THRESHOLD = 65
+STATIC_CONFIDENCE_THRESHOLD = 35
 STATIC_CLASSES = list('ABCDEFGHIJKLMNOPQRSTUVWXYZ') + [str(i) for i in range(10)]
 
 # ==========================================
@@ -593,6 +593,10 @@ def static_inference():
 @app.route('/static/session-analytics')
 def static_session_analytics():
     return render_template('static_analytics.html')
+
+@app.route('/static/dataset-analytics')
+def static_dataset_analytics():
+    return render_template('static_data_analytics.html')
 
 @app.route('/dynamic/video_feed')
 def dynamic_video_feed():

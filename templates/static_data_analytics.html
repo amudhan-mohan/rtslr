@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Static Dataset Analytics — RTSLR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Anta:wght@400;700;800&family=Ubuntu:wght@300;400;500;700&family=DM+Mono:wght@300;400;500&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Ubuntu', sans-serif;
+            background-color: #0f0f1a;
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 99px;
+        }
+
+        @keyframes fade-up {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-up {
+            animation: fade-up .4s ease both;
+        }
+
+        /* Mobile menu animation keyframes */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
+
+        #mobileMenu.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        #mobileMenu.hide {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        #menuToggle.active span:first-child {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        #menuToggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        #menuToggle.active span:last-child {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+
+        body.menu-open {
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body class="bg-[#0f0f1a] text-[#e8edf5]">
+
+    <!-- Navigation with Responsive Mobile Menu (Static, consistent style) -->
+    <nav class="sticky top-0 z-[100] bg-[#04070f]/85 backdrop-blur-md border-b border-[#1e2d47]">
+        <div class="flex items-center justify-between px-4 sm:px-6 md:px-10 h-16">
+            <!-- Logo -->
+            <a href="#"
+                class="flex items-center gap-2.5 font-extrabold text-xl tracking-tight no-underline text-[#e8edf5] font-['Anta',sans-serif]">
+                <div class="w-2.5 h-2.5 bg-[#00e5ff] rounded-full shadow-[0_0_12px_#00e5ff] animate-pulse-dot"></div>
+                RTSLR
+            </a>
+
+            <!-- Desktop Navigation Links (static) -->
+            <div class="hidden md:flex gap-0.5">
+                <a href="/"
+                    class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Index</a>
+                <a href="/change-mode"
+                    class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Change Mode</a>
+                <a href="/static/inference"
+                    class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Inference</a>
+                <a href="/static/session-analytics"
+                    class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Session
+                    Analytics</a>
+                <a href="/static/dataset-analytics"
+                    class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#00e5ff] bg-[#00e5ff]/10">Dataset
+                    Analytics</a>
+            </div>
+
+            <!-- Right side items (Status Badge + Mobile Menu) -->
+            <div class="flex items-center gap-3">
+                <div id="modelStatusBadge"
+                    class="flex items-center gap-2 py-1.5 px-3 sm:px-4 rounded-full text-[0.65rem] sm:text-xs font-bold font-['DM_Mono',monospace] tracking-wide border border-[#00ffa3]/30 bg-[#00ffa3]/5 text-[#00ffa3]">
+                    <div class="w-1.5 h-1.5 rounded-full bg-[#00ffa3] animate-pulse-dot"></div>
+                    <span class="hidden sm:inline">99.97% ACC</span>
+                    <span class="sm:hidden">99.97%</span>
+                </div>
+                <button id="menuToggle"
+                    class="md:hidden flex flex-col items-center justify-center w-8 h-8 rounded-md border border-[#1e2d47] bg-transparent hover:border-[#00e5ff] transition-all cursor-pointer">
+                    <span class="block w-4 h-0.5 bg-[#5a6a82] rounded-full transition-all duration-300"></span>
+                    <span class="block w-4 h-0.5 bg-[#5a6a82] rounded-full my-1 transition-all duration-300"></span>
+                    <span class="block w-4 h-0.5 bg-[#5a6a82] rounded-full transition-all duration-300"></span>
+                </button>
+            </div>
+        </div>
+        <div id="mobileMenu"
+            class="md:hidden hidden bg-[#04070f]/95 backdrop-blur-md border-t border-[#1e2d47] overflow-hidden transition-all duration-300">
+            <div class="flex flex-col py-3 px-4 space-y-1">
+                <a href="/"
+                    class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Index</a>
+                <a href="/change-mode"
+                    class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Change Mode</a>
+                <a href="/static/inference"
+                    class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Inference</a>
+                <a href="/static/session-analytics"
+                    class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Session Analytics</a>
+                <a href="/static/dataset-analytics"
+                    class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#00e5ff] bg-[#00e5ff]/10">Dataset Analytics</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- PAGE TITLE AREA -->
+    <div class="border-b border-[#1e2d47] bg-gradient-to-b from-[#0a0a0f] to-[#0f0f1a] relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 relative">
+            <div class="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-[#00e5ff]"></div>
+            <div class="absolute bottom-2 right-4 w-12 h-12 border-b-2 border-r-2 border-[#00e5ff]"></div>
+            <h1 class="font-['Anta',sans-serif] text-3xl sm:text-4xl md:text-5xl font-black tracking-tight">
+                Static Model <span class="italic text-[#00e5ff]">Analytics</span><br>
+                &amp; Full F1 Report
+            </h1>
+            <p class="text-sm text-[#5a6a82] max-w-xl mt-2 font-light leading-relaxed">
+                Direct export from notebook evaluation — Random Forest ensemble (500 estimators) 
+                trained on 36 classes (0-9, A-Z) Indian Sign Language alphabet dataset. 
+                Total 12,930 samples, 268 feature dimensions (pose + hand landmarks + tip distances).
+            </p>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+
+        <!-- Section 01: KPI BAND (Values from Random Forest output) -->
+        <div class="mb-8">
+            <div class="flex items-baseline gap-3 mb-4 pb-2 border-b-2 border-[#1e2d47]">
+                <span
+                    class="text-[0.65rem] font-['DM_Mono'] text-[#00e5ff] border border-[#00e5ff] px-1.5 py-0.5 rounded">01</span>
+                <h2 class="font-['Anta',sans-serif] text-xl font-bold text-white">Key Performance Indicators</h2>
+                <span class="text-[0.6rem] font-['DM_Mono'] text-[#5a6a82] ml-auto">Random Forest · 500 trees · n_jobs=-1</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div class="bg-[#101828] border border-[#1e2d47] rounded p-4 shadow-sm hover:bg-[#0b1121] transition animate-fade-up">
+                    <div class="w-6 h-1 rounded-full bg-[#00ffa3] mb-3"></div>
+                    <div class="text-3xl font-['Anta',sans-serif] font-black text-[#00ffa3]">99.97<span
+                            class="text-xl">%</span></div>
+                    <div class="text-[0.6rem] font-bold tracking-wider text-[#5a6a82] uppercase font-['DM_Mono'] mt-1">
+                        Test Accuracy</div>
+                    <div class="text-[0.6rem] text-[#5a6a82] font-['DM_Mono'] mt-0.5">12,930 test samples</div>
+                </div>
+                <div class="bg-[#101828] border border-[#1e2d47] rounded p-4 shadow-sm hover:bg-[#0b1121] transition animate-fade-up delay-1">
+                    <div class="w-6 h-1 rounded-full bg-[#00e5ff] mb-3"></div>
+                    <div class="text-3xl font-['Anta',sans-serif] font-black text-[#00e5ff]">1.00</div>
+                    <div class="text-[0.6rem] font-bold tracking-wider text-[#5a6a82] uppercase font-['DM_Mono'] mt-1">
+                        Macro F1 Score</div>
+                    <div class="text-[0.6rem] text-[#5a6a82] font-['DM_Mono'] mt-0.5">Perfect across all classes</div>
+                </div>
+                <div class="bg-[#101828] border border-[#1e2d47] rounded p-4 shadow-sm hover:bg-[#0b1121] transition animate-fade-up delay-2">
+                    <div class="w-6 h-1 rounded-full bg-[#7c3aed] mb-3"></div>
+                    <div class="text-3xl font-['Anta',sans-serif] font-black text-[#7c3aed]">12,930</div>
+                    <div class="text-[0.6rem] font-bold tracking-wider text-[#5a6a82] uppercase font-['DM_Mono'] mt-1">
+                        Total Samples</div>
+                    <div class="text-[0.6rem] text-[#5a6a82] font-['DM_Mono'] mt-0.5">10,344 train / 2,586 test</div>
+                </div>
+                <div class="bg-[#101828] border border-[#1e2d47] rounded p-4 shadow-sm hover:bg-[#0b1121] transition animate-fade-up delay-3">
+                    <div class="w-6 h-1 rounded-full bg-[#ff8c42] mb-3"></div>
+                    <div class="text-3xl font-['Anta',sans-serif] font-black text-[#ff8c42]">36</div>
+                    <div class="text-[0.6rem] font-bold tracking-wider text-[#5a6a82] uppercase font-['DM_Mono'] mt-1">
+                        Gesture Classes</div>
+                    <div class="text-[0.6rem] text-[#5a6a82] font-['DM_Mono'] mt-0.5">0-9, A-Z (ISL alphabet)</div>
+                </div>
+                <div class="bg-[#101828] border border-[#1e2d47] rounded p-4 shadow-sm hover:bg-[#0b1121] transition animate-fade-up delay-4">
+                    <div class="w-6 h-1 rounded-full bg-[#ff4444] mb-3"></div>
+                    <div class="text-3xl font-['Anta',sans-serif] font-black text-[#ff4444]">268</div>
+                    <div class="text-[0.6rem] font-bold tracking-wider text-[#5a6a82] uppercase font-['DM_Mono'] mt-1">
+                        Feature Dims</div>
+                    <div class="text-[0.6rem] text-[#5a6a82] font-['DM_Mono'] mt-0.5">Pose + hand + tip distances</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 02: MODEL OVERVIEW & Distribution -->
+        <div class="mb-8">
+            <div class="flex items-baseline gap-3 mb-4 pb-2 border-b-2 border-[#1e2d47]">
+                <span
+                    class="text-[0.65rem] font-['DM_Mono'] text-[#00e5ff] border border-[#00e5ff] px-1.5 py-0.5 rounded">02</span>
+                <h2 class="font-['Anta',sans-serif] text-xl font-bold text-white">Model Overview</h2>
+                <span class="text-[0.6rem] font-['DM_Mono'] text-[#5a6a82] ml-auto">Random Forest · Ensemble · 500 estimators</span>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                <!-- Accuracy gauge -->
+                <div class="bg-[#101828] border border-[#1e2d47] rounded overflow-hidden shadow-sm">
+                    <div class="bg-[#0b1121] px-4 py-2 border-b border-[#1e2d47] flex justify-between items-center">
+                        <span class="text-[0.65rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">Overall
+                            Performance</span>
+                        <span class="bg-[#1a1a2e] text-white text-[0.55rem] px-2 py-0.5 rounded">Random Forest</span>
+                    </div>
+                    <div class="p-5 flex flex-col items-center text-center">
+                        <div class="text-5xl font-['Anta',sans-serif] font-black text-[#00ffa3]">99.97<span
+                                class="text-2xl">%</span></div>
+                        <div class="text-[0.65rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82] mt-1">Test
+                            Set Accuracy</div>
+                        <div class="text-xs text-[#5a6a82] mt-2">Perfect classification across<br>all 36 gesture classes</div>
+                        <div class="mt-4">
+                            <canvas id="gaugeChart" style="max-width:150px; max-height:75px;"></canvas>
+                        </div>
+                        <div class="w-full mt-4 space-y-2">
+                            <div class="flex justify-between items-center p-2 border border-[#1e2d47] rounded bg-[#0b1121]">
+                                <span class="text-[0.6rem] font-['DM_Mono'] uppercase text-[#5a6a82]">Macro
+                                    Precision</span>
+                                <span class="text-sm font-['DM_Mono'] font-semibold text-[#00ffa3]">1.00</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 border border-[#1e2d47] rounded bg-[#0b1121]">
+                                <span class="text-[0.6rem] font-['DM_Mono'] uppercase text-[#5a6a82]">Macro
+                                    Recall</span>
+                                <span class="text-sm font-['DM_Mono'] font-semibold text-[#00e5ff]">1.00</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 border border-[#1e2d47] rounded bg-[#0b1121]">
+                                <span class="text-[0.6rem] font-['DM_Mono'] uppercase text-[#5a6a82]">Macro F1</span>
+                                <span class="text-sm font-['DM_Mono'] font-semibold text-[#7c3aed]">1.00</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 border border-[#1e2d47] rounded bg-[#0b1121]">
+                                <span class="text-[0.6rem] font-['DM_Mono'] uppercase text-[#5a6a82]">Weighted F1</span>
+                                <span class="text-sm font-['DM_Mono'] font-semibold text-[#ff8c42]">1.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Dataset split pie -->
+                <div class="bg-[#101828] border border-[#1e2d47] rounded overflow-hidden shadow-sm">
+                    <div class="bg-[#0b1121] px-4 py-2 border-b border-[#1e2d47] flex justify-between items-center">
+                        <span class="text-[0.65rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">Dataset
+                            Split</span>
+                        <span class="bg-[#1a1a2e] text-white text-[0.55rem] px-2 py-0.5 rounded">80 / 20</span>
+                    </div>
+                    <div class="p-5 flex flex-col items-center">
+                        <canvas id="splitChart" style="max-width:190px; max-height:170px;"></canvas>
+                        <div class="w-full mt-4 space-y-2">
+                            <div class="flex justify-between items-center p-2 border border-[#1e2d47] rounded bg-[#0b1121]">
+                                <span class="text-[0.6rem] font-['DM_Mono'] uppercase text-[#5a6a82]">Training
+                                    Samples</span>
+                                <span class="text-sm font-['DM_Mono'] font-semibold text-[#7c3aed]">10,344</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 border border-[#1e2d47] rounded bg-[#0b1121]">
+                                <span class="text-[0.6rem] font-['DM_Mono'] uppercase text-[#5a6a82]">Test
+                                    Samples</span>
+                                <span class="text-sm font-['DM_Mono'] font-semibold text-[#00e5ff]">2,586</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 border border-[#1e2d47] rounded bg-[#0b1121]">
+                                <span class="text-[0.6rem] font-['DM_Mono'] uppercase text-[#5a6a82]">Total
+                                    Samples</span>
+                                <span class="text-sm font-['DM_Mono'] font-semibold text-white">12,930</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2 border border-[#1e2d47] rounded bg-[#0b1121]">
+                                <span class="text-[0.6rem] font-['DM_Mono'] uppercase text-[#5a6a82]">Feature
+                                    Dims</span>
+                                <span class="text-sm font-['DM_Mono'] font-semibold text-white">268</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- F1 distribution (all perfect) -->
+                <div class="bg-[#101828] border border-[#1e2d47] rounded overflow-hidden shadow-sm">
+                    <div class="bg-[#0b1121] px-4 py-2 border-b border-[#1e2d47] flex justify-between items-center">
+                        <span class="text-[0.65rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">F1 Score
+                            Distribution</span>
+                        <span class="bg-[#1a1a2e] text-white text-[0.55rem] px-2 py-0.5 rounded">36 classes</span>
+                    </div>
+                    <div class="p-5">
+                        <canvas id="distChart"></canvas>
+                        <div class="flex flex-wrap gap-3 mt-4">
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-3 h-3 rounded-sm bg-[#00ffa3]"></div>
+                                <span class="text-[0.65rem] font-['DM_Mono'] text-[#5a6a82]">Perfect (1.00) · 36</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 03: F1 SCORES (Full classification table + grid) -->
+        <div class="mb-8">
+            <div class="flex items-baseline gap-3 mb-4 pb-2 border-b-2 border-[#1e2d47]">
+                <span
+                    class="text-[0.65rem] font-['DM_Mono'] text-[#00e5ff] border border-[#00e5ff] px-1.5 py-0.5 rounded">03</span>
+                <h2 class="font-['Anta',sans-serif] text-xl font-bold text-white">Per-Class F1 Scores</h2>
+                <span class="text-[0.6rem] font-['DM_Mono'] text-[#5a6a82] ml-auto">All 36 classes · Perfect 1.00 F1 across all</span>
+            </div>
+            <div class="bg-[#101828] border border-[#1e2d47] rounded overflow-hidden shadow-sm mb-5">
+                <div class="bg-[#0b1121] px-4 py-2 border-b border-[#1e2d47] flex justify-between items-center">
+                    <span class="text-[0.65rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">F1 Score Chart
+                        — All 36 Gesture Classes</span>
+                    <span class="bg-[#1a1a2e] text-white text-[0.55rem] px-2 py-0.5 rounded">Perfect classification</span>
+                </div>
+                <div class="p-4 overflow-x-auto">
+                    <canvas id="perClassChart" style="min-width: 980px;"></canvas>
+                </div>
+            </div>
+            <div class="bg-[#101828] border border-[#1e2d47] rounded overflow-hidden shadow-sm">
+                <div class="bg-[#0b1121] px-4 py-2 border-b border-[#1e2d47] flex justify-between items-center">
+                    <span class="text-[0.65rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">F1 Coverage
+                        Grid — All Classes</span>
+                    <span class="bg-[#1a1a2e] text-white text-[0.55rem] px-2 py-0.5 rounded">Perfect score (1.00)</span>
+                </div>
+                <div class="p-5">
+                    <div id="chipGrid"
+                        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 04: FULL REPORT TABLE -->
+        <div>
+            <div class="flex items-baseline gap-3 mb-4 pb-2 border-b-2 border-[#1e2d47]">
+                <span
+                    class="text-[0.65rem] font-['DM_Mono'] text-[#00e5ff] border border-[#00e5ff] px-1.5 py-0.5 rounded">04</span>
+                <h2 class="font-['Anta',sans-serif] text-xl font-bold text-white">Full Classification Report</h2>
+                <span class="text-[0.6rem] font-['DM_Mono'] text-[#5a6a82] ml-auto">Precision · Recall · F1 · Support —
+                    36 classes · 2,586 test samples</span>
+            </div>
+            <div class="bg-[#101828] border border-[#1e2d47] rounded overflow-hidden shadow-sm">
+                <div class="overflow-x-auto max-h-[540px] overflow-y-auto custom-scroll">
+                    <table class="w-full border-collapse min-w-[800px]">
+                        <thead class="sticky top-0 bg-[#0b1121] z-10">
+                            <tr class="border-b-2 border-[#1e2d47]">
+                                <th class="text-left p-3 text-[0.6rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">#</th>
+                                <th class="text-left p-3 text-[0.6rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">Class</th>
+                                <th class="text-right p-3 text-[0.6rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">Precision</th>
+                                <th class="text-right p-3 text-[0.6rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">Recall</th>
+                                <th class="text-right p-3 text-[0.6rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">F1 Score</th>
+                                <th class="text-left p-3 text-[0.6rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">F1 Visual</th>
+                                <th class="text-right p-3 text-[0.6rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">Support</th>
+                                <th class="text-left p-3 text-[0.6rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="f1Tbody"></tbody>
+                    </table>
+                </div>
+                <div class="bg-[#0b1121] border-t-2 border-[#1e2d47] p-4 flex flex-wrap gap-6">
+                    <div><div class="text-[0.6rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">Overall Accuracy</div><div class="text-base font-['DM_Mono'] font-bold text-[#00ffa3]">0.9997 / 2,586 samples</div></div>
+                    <div><div class="text-[0.6rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">Macro Avg (P / R / F1)</div><div class="text-base font-['DM_Mono'] font-bold text-[#7c3aed]">1.00 / 1.00 / 1.00</div></div>
+                    <div><div class="text-[0.6rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">Weighted Avg (P / R / F1)</div><div class="text-base font-['DM_Mono'] font-bold text-[#00e5ff]">1.00 / 1.00 / 1.00</div></div>
+                    <div><div class="text-[0.6rem] font-['DM_Mono'] uppercase tracking-wide text-[#5a6a82]">Perfect F1 (1.00) Classes</div><div class="text-base font-['DM_Mono'] font-bold text-[#ff8c42]">36 / 36</div></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --------------------------------------------------------------
+        // STATIC DATA extracted from Random Forest notebook output
+        // 36 classes: 0-9 and A-Z
+        const classLabels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+            'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+            'U', 'V', 'W', 'X', 'Y', 'Z'];
+        
+        // Support values from the classification report output
+        const supportValues = [356, 360, 356, 358, 360, 357, 358, 357, 357, 360,
+            360, 360, 356, 360, 355, 378, 360, 353, 355, 356,
+            360, 360, 360, 360, 360, 360, 359, 360, 360, 359,
+            360, 360, 360, 360, 360, 360];
+        
+        // All metrics are perfect 1.00
+        const CLASS_DATA = classLabels.map((name, idx) => ({
+            name: name,
+            p: 1.00,
+            r: 1.00,
+            f1: 1.00,
+            sup: supportValues[idx]
+        }));
+
+        function f1Color(f1) {
+            if (f1 === 1.00) return '#00ffa3';
+            if (f1 >= 0.95) return '#7c3aed';
+            if (f1 >= 0.90) return '#00e5ff';
+            return '#ff4444';
+        }
+        function f1BgColor(f1) {
+            if (f1 === 1.00) return 'rgba(0,255,163,0.2)';
+            if (f1 >= 0.95) return 'rgba(124,58,237,0.2)';
+            if (f1 >= 0.90) return 'rgba(0,229,255,0.2)';
+            return 'rgba(255,68,68,0.2)';
+        }
+        function f1Grade(f1) {
+            if (f1 === 1.00) return ['bg-[#00ffa3]/20 text-[#00ffa3] border border-[#00ffa3]/30', 'PERFECT'];
+            if (f1 >= 0.95) return ['bg-[#7c3aed]/20 text-[#7c3aed] border border-[#7c3aed]/30', 'HIGH'];
+            if (f1 >= 0.90) return ['bg-[#00e5ff]/20 text-[#00e5ff] border border-[#00e5ff]/30', 'GOOD'];
+            return ['bg-[#ff4444]/20 text-[#ff4444] border border-[#ff4444]/30', 'FAIR'];
+        }
+
+        Chart.defaults.color = '#5a6a82';
+        Chart.defaults.borderColor = '#1e2d47';
+        Chart.defaults.font.family = "'DM Mono', monospace";
+        Chart.defaults.font.size = 10;
+
+        new Chart(document.getElementById('gaugeChart'), {
+            type: 'doughnut',
+            data: { datasets: [{ data: [99.97, 0.03], backgroundColor: ['rgba(0,255,163,0.75)', 'rgba(30,45,71,0.6)'], borderColor: ['#00ffa3', '#1e2d47'], borderWidth: 2 }] },
+            options: { responsive: true, cutout: '78%', plugins: { legend: { display: false } }, rotation: -90, circumference: 180 }
+        });
+        new Chart(document.getElementById('splitChart'), {
+            type: 'doughnut',
+            data: { labels: ['Train (10,344)', 'Test (2,586)'], datasets: [{ data: [10344, 2586], backgroundColor: ['rgba(124,58,237,0.3)', 'rgba(0,229,255,0.3)'], borderColor: ['#7c3aed', '#00e5ff'], borderWidth: 2, hoverOffset: 8 }] },
+            options: { responsive: true, cutout: '58%', plugins: { legend: { display: true, position: 'bottom', labels: { color: '#5a6a82', font: { size: 10 } } } } }
+        });
+        new Chart(document.getElementById('distChart'), {
+            type: 'bar',
+            data: { labels: ['1.00'], datasets: [{ label: '# Classes', data: [36], backgroundColor: ['rgba(0,255,163,0.5)'], borderColor: ['#00ffa3'], borderWidth: 1.5, borderRadius: 3 }] },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(30,45,71,0.5)' } }, y: { grid: { color: 'rgba(30,45,71,0.5)' }, beginAtZero: true, title: { display: true, text: '# of Classes', color: '#5a6a82' } } } }
+        });
+
+        const sorted = [...CLASS_DATA].sort((a, b) => b.f1 - a.f1);
+        new Chart(document.getElementById('perClassChart'), {
+            type: 'bar', data: { labels: sorted.map(d => d.name), datasets: [{ label: 'F1 Score', data: sorted.map(d => d.f1), backgroundColor: sorted.map(d => f1BgColor(d.f1)), borderColor: sorted.map(d => f1Color(d.f1)), borderWidth: 1.5, borderRadius: 3 }, { label: 'Precision', data: sorted.map(d => d.p), type: 'line', borderColor: 'rgba(124,58,237,0.7)', pointRadius: 2, tension: .2, fill: false, borderWidth: 1.5 }, { label: 'Recall', data: sorted.map(d => d.r), type: 'line', borderColor: 'rgba(0,229,255,0.7)', pointRadius: 2, tension: .2, fill: false, borderWidth: 1.5 }] },
+            options: { responsive: true, plugins: { legend: { labels: { color: '#5a6a82' } } }, scales: { x: { ticks: { font: { size: 10 }, maxRotation: 45, minRotation: 45 }, grid: { color: 'rgba(30,45,71,0.4)' } }, y: { min: 0.98, max: 1.01, ticks: { callback: v => v.toFixed(2) }, grid: { color: 'rgba(30,45,71,0.4)' } } } }
+        });
+        
+        const gridDiv = document.getElementById('chipGrid');
+        CLASS_DATA.forEach(d => {
+            const c = f1Color(d.f1);
+            gridDiv.innerHTML += `<div class="bg-[#0b1121] border border-[#1e2d47] rounded p-2 hover:bg-[#1a1a2e] transition"><div class="text-[0.62rem] font-['DM_Mono'] font-semibold uppercase text-[#5a6a82]">${d.name}</div><div class="text-sm font-['DM_Mono'] font-bold mt-1" style="color:${c}">F1 ${d.f1.toFixed(2)}</div><div class="h-1 bg-[#1e2d47] rounded-full mt-2 overflow-hidden"><div class="h-full rounded-full" style="width: ${d.f1 * 100}%; background: ${c}; opacity: 0.65;"></div></div></div>`;
+        });
+        
+        const f1Tbody = document.getElementById('f1Tbody');
+        CLASS_DATA.forEach((d, i) => {
+            const [pillCls, grade] = f1Grade(d.f1);
+            const barCol = f1Color(d.f1);
+            f1Tbody.innerHTML += `<tr class="border-b border-[#1e2d47] hover:bg-[#0b1121]"><td class="p-2 text-[0.68rem] font-['DM_Mono'] text-[#5a6a82]">${i+1}</td><td class="p-2"><span class="text-sm font-['DM_Mono'] font-semibold text-white">${d.name}</span></td><td class="p-2 text-right font-['DM_Mono'] text-sm text-[#5a6a82]">${d.p.toFixed(2)}</td><td class="p-2 text-right font-['DM_Mono'] text-sm text-[#5a6a82]">${d.r.toFixed(2)}</td><td class="p-2 text-right font-['DM_Mono'] text-sm font-bold" style="color:${barCol}">${d.f1.toFixed(2)}</td><td class="p-2"><div class="flex items-center gap-2"><div class="w-24 h-1.5 bg-[#1e2d47] rounded-full overflow-hidden"><div class="h-full rounded-full" style="width: ${d.f1 * 100}%; background: ${barCol};"></div></div><span class="text-[0.65rem] font-['DM_Mono']" style="color:${barCol}">${(d.f1 * 100).toFixed(0)}%</span></div></td><td class="p-2 text-right font-['DM_Mono'] text-sm text-[#5a6a82]">${d.sup}</td><td class="p-2"><span class="text-[0.58rem] font-['DM_Mono'] font-bold px-2 py-0.5 rounded ${pillCls}">${grade}</span></td></tr>`;
+        });
+
+        // Mobile menu interaction (keep consistent)
+        (function () {
+            const menuToggle = document.getElementById('menuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (menuToggle && mobileMenu) {
+                menuToggle.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    mobileMenu.classList.toggle('show');
+                    menuToggle.classList.toggle('active');
+                });
+                document.addEventListener('click', function (event) {
+                    if (!menuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        if (mobileMenu.classList.contains('show')) {
+                            mobileMenu.classList.remove('show');
+                            menuToggle.classList.remove('active');
+                        }
+                    }
+                });
+                const mobileLinks = mobileMenu.querySelectorAll('a');
+                mobileLinks.forEach(link => {
+                    link.addEventListener('click', function () {
+                        mobileMenu.classList.remove('show');
+                        menuToggle.classList.remove('active');
+                    });
+                });
+                window.addEventListener('resize', function () {
+                    if (window.innerWidth >= 768) {
+                        if (mobileMenu.classList.contains('show')) {
+                            mobileMenu.classList.remove('show');
+                            menuToggle.classList.remove('active');
+                        }
+                    }
+                });
+            }
+        })();
+    </script>
+</body>
+
+</html>

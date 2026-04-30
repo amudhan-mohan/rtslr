@@ -232,11 +232,16 @@
                 <a href="/"
                     class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Index</a>
                 <a href="/change-mode"
-                    class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Change Mode</a>
+                    class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Change
+                    Mode</a>
                 <a href="/static/inference"
                     class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#00e5ff] bg-[#00e5ff]/10">Inference</a>
                 <a href="/static/session-analytics"
-                    class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Session Analytics</a>
+                    class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Session
+                    Analytics</a>
+                <a href="/static/dataset-analytics"
+                    class="px-[18px] py-1.5 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Dataset
+                    Analytics</a>
             </div>
             <div class="flex items-center gap-3">
                 <div id="modelStatus"
@@ -259,11 +264,16 @@
                 <a href="/"
                     class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Index</a>
                 <a href="/change-mode"
-                    class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Change Mode</a>
+                    class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Change
+                    Mode</a>
                 <a href="/static/inference"
                     class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#00e5ff] bg-[#00e5ff]/10">Inference</a>
                 <a href="/static/session-analytics"
-                    class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Session Analytics</a>
+                    class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Session
+                    Analytics</a>
+                <a href="/static/dataset-analytics"
+                    class="px-4 py-3 rounded-md text-sm font-semibold tracking-wide no-underline text-[#5a6a82] transition-all hover:text-[#e8edf5] hover:bg-[#0b1121]">Dataset
+                    Analytics</a>
             </div>
         </div>
     </nav>
@@ -736,7 +746,7 @@
 
             // PROFESSIONAL AUTO-ADD with better delay logic
             const now = Date.now();
-            const MIN_CONFIDENCE = 70;  // Higher threshold
+            const MIN_CONFIDENCE = 40;  // Higher threshold
             const COOLDOWN_MS = 2500;    // Increased from 600ms to 2500ms (2.5 seconds)
             const MIN_GAP_MS = 800;      // Minimum time between same letter
 

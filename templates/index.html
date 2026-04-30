@@ -132,7 +132,7 @@
     .hero-title {
       font-family: 'Syne', sans-serif;
       font-weight: 800;
-      font-size: clamp(2.5rem, 8vw, 6.5rem);
+      font-size: clamp(2.2rem, 8vw, 6.5rem);
       line-height: 1.0;
       letter-spacing: -0.03em;
     }
@@ -622,7 +622,8 @@
       <div class="aos inline-flex items-center gap-2 mb-6 sm:mb-8 px-3 py-2 sm:px-4 rounded-full"
         style="background:rgba(0,113,227,0.12);border:1px solid rgba(0,113,227,0.28)">
         <span class="w-2 h-2 rounded-full bg-blue-400 pulse-ring"></span>
-        <span class="text-[10px] sm:text-xs font-medium text-blue-300 tracking-wide">A Final Year Project — B.E. Computer Science and Engineering</span>
+        <span class="text-[10px] sm:text-xs font-medium text-blue-300 tracking-wide">A Final Year Project — B.E.
+          Computer Science and Engineering</span>
       </div>
 
       <!-- Main Title -->
@@ -667,7 +668,7 @@
       </div>
 
       <!-- Stats Row - Responsive grid -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-3xl mx-auto aos aos-d4">
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 sm:gap-5 max-w-3xl mx-auto aos aos-d4">
         <div class="glass-card text-center px-2 sm:px-4 py-3 sm:py-5">
           <div class="text-2xl sm:text-3xl font-display font-800 text-white mb-1"
             style="font-family:'Anta',sans-serif;font-weight:800">49</div>
@@ -681,7 +682,12 @@
         <div class="glass-card text-center px-2 sm:px-4 py-3 sm:py-5">
           <div class="text-2xl sm:text-3xl font-display font-800 text-white mb-1"
             style="font-family:'Anta',sans-serif;font-weight:800">98.48%</div>
-          <div class="text-[10px] sm:text-xs text-white/40 font-medium">Accuracy</div>
+          <div class="text-[10px] sm:text-xs text-white/40 font-medium">Dynamic Accuracy</div>
+        </div>
+        <div class="glass-card text-center px-2 sm:px-4 py-3 sm:py-5">
+          <div class="text-2xl sm:text-3xl font-display font-800 text-white mb-1"
+            style="font-family:'Anta',sans-serif;font-weight:800">99.97%</div>
+          <div class="text-[10px] sm:text-xs text-white/40 font-medium">Static Accuracy</div>
         </div>
         <div class="glass-card text-center px-2 sm:px-4 py-3 sm:py-5">
           <div class="text-2xl sm:text-3xl font-display font-800 text-white mb-1"
@@ -691,8 +697,8 @@
       </div>
 
       <!-- Scroll cue -->
-      <div
-        class="mt-16 sm:mt-20 flex flex-col items-center gap-2 text-white/25 text-[10px] sm:text-xs tracking-widest uppercase">
+      <div id="scrollIndicator"
+        class="mt-16 sm:mt-20 flex flex-col items-center gap-2 text-white/25 text-[10px] sm:text-xs tracking-widest uppercase cursor-pointer hover:text-white/40 transition-colors">
         <span>Scroll to explore</span>
         <svg class="animate-bounce" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2">
@@ -1745,7 +1751,8 @@
         <div class="glass-card p-6 sm:p-8">
           <div class="text-2xl sm:text-3xl mb-3 sm:mb-4">🎓</div>
           <h4 class="font-display font-700 text-white text-base sm:text-lg mb-2"
-            style="font-family:'Anta',sans-serif;font-weight:700">B.E. Computer Science and Engineering — A Final Year Project, 2026
+            style="font-family:'Anta',sans-serif;font-weight:700">B.E. Computer Science and Engineering — A Final Year
+            Project, 2026
           </h4>
           <p class="text-white/40 text-xs sm:text-sm">Department of Computer Science & Engineering,</p>
           <p class="text-white/40 text-xs sm:text-sm">Annamalai University.</p>
@@ -1779,22 +1786,21 @@
         <div>
           <div class="text-xs font-semibold text-white/30 uppercase tracking-wider mb-4">Navigation</div>
           <div class="space-y-2">
-            <a href="#about"
-              class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">About the Project</a>
-              <a
-              href="#how-it-works" class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">How
+            <a href="#about" class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">About the
+              Project</a>
+            <a href="#how-it-works"
+              class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">How
               It Works</a>
-              <a href="#features"
+            <a href="#features"
               class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Features</a>
-              <a
-              href="#gestures" class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Gesture
+            <a href="#gestures"
+              class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Gesture
               Library</a>
-              <a href="#architecture"
+            <a href="#architecture"
               class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Model Architecture</a>
-              <a
-              href="#team" class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Team</a>
-              <a
-              href="/change-mode" class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Change Mode</a>
+            <a href="#team" class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Team</a>
+            <a href="/change-mode"
+              class="block text-xs sm:text-sm text-white/50 hover:text-white transition-colors">Change Mode</a>
           </div>
         </div>
 
@@ -1901,6 +1907,15 @@
         });
       }
     })();
+    document.getElementById('scrollIndicator').addEventListener('click', function () {
+      const aboutSection = document.getElementById('about');
+      if (aboutSection) {
+        aboutSection.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
   </script>
 
 </body>
